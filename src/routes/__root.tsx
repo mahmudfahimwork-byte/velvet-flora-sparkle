@@ -81,15 +81,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Velvet Flora — Dainty Jewellery in Bangladesh" },
+      { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
       {
         name: "description",
         content:
-          "Velvet Flora sells delicate bracelets, pendants and anklets from ৳500. Cash on delivery across Bangladesh.",
+          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
       },
       { name: "author", content: "Velvet Flora" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { name: "twitter:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { property: "og:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
+      { name: "twitter:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
