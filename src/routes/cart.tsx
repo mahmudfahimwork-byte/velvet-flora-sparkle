@@ -62,21 +62,20 @@ function CartPage() {
     setErrors({});
     setSubmitting(true);
 
-    const { data, error } = await supabase
-      .from("orders")
-      .insert({
-        customer_name: parsed.data.customer_name,
-        phone: parsed.data.phone,
-        address: parsed.data.address,
-        notes: parsed.data.notes ?? "",
-        area,
-        items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
-        subtotal,
-        delivery_fee: deliveryFee,
-        total,
-      })
-      .select("order_code")
-      .single();
+    const orderCode = `VF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+    const { error } = await supabase.from("orders").insert({
+      order_code: orderCode,
+      customer_name: parsed.data.customer_name,
+      phone: parsed.data.phone,
+      address: parsed.data.address,
+      notes: parsed.data.notes ?? "",
+      area,
+      items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
+      subtotal,
+      delivery_fee: deliveryFee,
+      total,
+    });
 
     setSubmitting(false);
 
@@ -86,7 +85,7 @@ function CartPage() {
     }
 
     clear();
-    navigate({ to: "/order-confirmed", search: { code: data.order_code } });
+    navigate({ to: "/order-confirmed", search: { code: orderCode } });
   }
 
   if (!lines.length) {
