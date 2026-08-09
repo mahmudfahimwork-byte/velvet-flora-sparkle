@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
+import { getSheetSetting, saveSheetSetting, syncOrdersToSheet, syncOrderStatusToSheet } from "@/lib/sheets.functions";
 import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
 
 
