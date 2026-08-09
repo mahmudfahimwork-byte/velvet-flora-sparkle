@@ -4,7 +4,7 @@ import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
+import { getSheetSetting, saveSheetSetting, syncOrdersToSheet, syncOrderStatusToSheet } from "@/lib/sheets.functions";
 import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
 
 
@@ -198,6 +198,8 @@ function ClaimCard({ onClaimed }: { onClaimed: () => void }) {
 function OrdersDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const pushStatus = useServerFn(syncOrderStatusToSheet);
+
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -249,8 +251,20 @@ function OrdersDashboard() {
       toast.error("Could not update the order");
       return;
     }
+    const order = orders.find((o) => o.id === id);
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    if (order) {
+      try {
+        const r = await pushStatus({ data: { orderCode: order.order_code, status } });
+        if (r.configured && !r.updated) {
+          toast.message("Status saved. That order isn't in your sheet yet — it will be added on the next sync.");
+        }
+      } catch {
+        toast.error("Status saved, but the Google Sheet couldn't be updated.");
+      }
+    }
   }
+
 
   const newCount = orders.filter((o) => o.status === "new").length;
 

@@ -94,3 +94,23 @@ export const syncOrdersToSheet = createServerFn({ method: "POST" })
 
     return { synced: rows.length, configured: true };
   });
+
+export const syncOrderStatusToSheet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderCode: string; status: string }) => input)
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context as never);
+
+    const { data: setting } = await context.supabase
+      .from("store_settings")
+      .select("value")
+      .eq("key", "google_sheet_id")
+      .maybeSingle();
+    const spreadsheetId = setting?.value as string | undefined;
+    if (!spreadsheetId) return { updated: false, configured: false };
+
+    const { getFirstSheetTitle, updateStatusForOrder } = await import("@/lib/sheets.server");
+    const title = await getFirstSheetTitle(spreadsheetId);
+    const updated = await updateStatusForOrder(spreadsheetId, title, data.orderCode, data.status);
+    return { updated, configured: true };
+  });

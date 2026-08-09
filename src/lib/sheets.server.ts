@@ -65,3 +65,21 @@ export async function appendRows(
     { method: "POST", body: JSON.stringify({ values }) },
   );
 }
+
+export async function updateStatusForOrder(
+  spreadsheetId: string,
+  title: string,
+  orderCode: string,
+  status: string,
+): Promise<boolean> {
+  const data = await call(`/spreadsheets/${spreadsheetId}/values/${title}!A1:A10000`);
+  const values = (data["values"] as string[][] | undefined) ?? [];
+  const index = values.findIndex((row) => (row?.[0] ?? "").trim() === orderCode);
+  if (index === -1) return false;
+  const rowNumber = index + 1;
+  await call(
+    `/spreadsheets/${spreadsheetId}/values/${title}!K${rowNumber}:K${rowNumber}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values: [[status]] }) },
+  );
+  return true;
+}
