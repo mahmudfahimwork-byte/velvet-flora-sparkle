@@ -2,8 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
+import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
 import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -270,6 +273,10 @@ function OrdersDashboard() {
       </div>
       <div className="gold-rule my-6" />
 
+      <SheetSyncCard orderCount={orders.length} />
+
+
+
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading orders…</p>
       ) : orders.length === 0 ? (
@@ -338,3 +345,91 @@ function OrdersDashboard() {
     </div>
   );
 }
+
+function SheetSyncCard({ orderCount }: { orderCount: number }) {
+  const readSetting = useServerFn(getSheetSetting);
+  const saveSetting = useServerFn(saveSheetSetting);
+  const syncNow = useServerFn(syncOrdersToSheet);
+
+  const [sheetId, setSheetId] = useState<string | null>(null);
+  const [url, setUrl] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    readSetting({})
+      .then((r) => setSheetId(r.spreadsheetId || null))
+      .catch(() => setSheetId(null));
+  }, [readSetting]);
+
+  const runSync = useCallback(
+    async (silent: boolean) => {
+      try {
+        const r = await syncNow({});
+        if (!silent && r.configured) toast.success(`${r.synced} order(s) added to your sheet`);
+      } catch (e) {
+        if (!silent) toast.error(e instanceof Error ? e.message : "Sync failed");
+      }
+    },
+    [syncNow],
+  );
+
+  useEffect(() => {
+    if (sheetId) void runSync(true);
+  }, [sheetId, orderCount, runSync]);
+
+  async function save(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const r = await saveSetting({ data: { sheetUrl: url } });
+      setSheetId(r.spreadsheetId);
+      setUrl("");
+      toast.success("Google Sheet connected");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Could not connect that sheet");
+    }
+    setBusy(false);
+  }
+
+  return (
+    <div className="mb-8 rounded-xl border border-border bg-card p-5">
+      <p className="font-display text-xl">Google Sheet</p>
+      {sheetId ? (
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+          <span>Orders are copied to your sheet automatically.</span>
+          <a
+            href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
+            target="_blank"
+            rel="noreferrer"
+            className="underline"
+          >
+            Open sheet
+          </a>
+          <button onClick={() => runSync(false)} className="underline">
+            Sync now
+          </button>
+          <button onClick={() => setSheetId(null)} className="underline">
+            Change sheet
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={save} className="mt-3 flex flex-wrap gap-2">
+          <input
+            value={url}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="Paste your Google Sheet link"
+            className="min-w-64 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+          />
+          <button
+            type="submit"
+            disabled={busy}
+            className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+          >
+            {busy ? "Connecting…" : "Connect"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
