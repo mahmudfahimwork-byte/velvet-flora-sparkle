@@ -251,8 +251,20 @@ function OrdersDashboard() {
       toast.error("Could not update the order");
       return;
     }
+    const order = orders.find((o) => o.id === id);
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
+    if (order) {
+      try {
+        const r = await pushStatus({ data: { orderCode: order.order_code, status } });
+        if (r.configured && !r.updated) {
+          toast.message("Status saved. That order isn't in your sheet yet — it will be added on the next sync.");
+        }
+      } catch {
+        toast.error("Status saved, but the Google Sheet couldn't be updated.");
+      }
+    }
   }
+
 
   const newCount = orders.filter((o) => o.status === "new").length;
 
