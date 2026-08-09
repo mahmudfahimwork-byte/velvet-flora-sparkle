@@ -273,6 +273,10 @@ function OrdersDashboard() {
       </div>
       <div className="gold-rule my-6" />
 
+      <SheetSyncCard orderCount={orders.length} />
+
+
+
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading orders…</p>
       ) : orders.length === 0 ? (
