@@ -25,7 +25,9 @@ export type Database = {
           items: Json
           notes: string
           order_code: string
+          pathao_consignment_id: string | null
           phone: string
+          sheet_synced_at: string | null
           status: string
           subtotal: number
           total: number
@@ -40,7 +42,9 @@ export type Database = {
           items?: Json
           notes?: string
           order_code?: string
+          pathao_consignment_id?: string | null
           phone: string
+          sheet_synced_at?: string | null
           status?: string
           subtotal: number
           total: number
@@ -55,7 +59,9 @@ export type Database = {
           items?: Json
           notes?: string
           order_code?: string
+          pathao_consignment_id?: string | null
           phone?: string
+          sheet_synced_at?: string | null
           status?: string
           subtotal?: number
           total?: number
@@ -98,6 +104,24 @@ export type Database = {
           name?: string
           price?: number
           slug?: string
+        }
+        Relationships: []
+      }
+      store_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value?: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
