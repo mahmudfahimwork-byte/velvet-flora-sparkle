@@ -198,6 +198,8 @@ function ClaimCard({ onClaimed }: { onClaimed: () => void }) {
 function OrdersDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
+  const pushStatus = useServerFn(syncOrderStatusToSheet);
+
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
