@@ -1,18 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error || !data) throw new Error("Forbidden");
-}
-
 export const getSheetSetting = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as never);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError || !isAdmin) throw new Error("Forbidden");
     const { data } = await context.supabase
       .from("store_settings")
       .select("value")
@@ -25,7 +21,11 @@ export const saveSheetSetting = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { sheetUrl: string }) => input)
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as never);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError || !isAdmin) throw new Error("Forbidden");
     const { parseSpreadsheetId, getFirstSheetTitle } = await import("@/lib/sheets.server");
     const id = parseSpreadsheetId(data.sheetUrl);
     if (!id) throw new Error("That doesn't look like a Google Sheet link.");
@@ -43,7 +43,11 @@ export const saveSheetSetting = createServerFn({ method: "POST" })
 export const syncOrdersToSheet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    await assertAdmin(context as never);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError || !isAdmin) throw new Error("Forbidden");
 
     const { data: setting } = await context.supabase
       .from("store_settings")
@@ -56,15 +60,16 @@ export const syncOrdersToSheet = createServerFn({ method: "POST" })
     const { data: orders, error } = await context.supabase
       .from("orders")
       .select("*")
-      .is("sheet_synced_at", null)
       .order("created_at", { ascending: true });
     if (error) throw new Error(error.message);
     if (!orders?.length) return { synced: 0, configured: true };
 
-    const { getFirstSheetTitle, appendRows } = await import("@/lib/sheets.server");
+    const { getFirstSheetTitle, appendRows, reconcileOrderStatuses } = await import("@/lib/sheets.server");
     const title = await getFirstSheetTitle(spreadsheetId);
 
-    const rows = orders.map((o: any) => [
+    const unsyncedOrders = orders.filter((order) => !order.sheet_synced_at);
+
+    const rows = unsyncedOrders.map((o: any) => [
       o.order_code,
       new Date(o.created_at).toLocaleString("en-GB"),
       o.customer_name,
@@ -81,25 +86,38 @@ export const syncOrdersToSheet = createServerFn({ method: "POST" })
       o.notes ?? "",
     ]);
 
-    await appendRows(spreadsheetId, title, rows);
+    if (rows.length) await appendRows(spreadsheetId, title, rows);
 
-    const now = new Date().toISOString();
-    await context.supabase
-      .from("orders")
-      .update({ sheet_synced_at: now })
-      .in(
-        "id",
-        orders.map((o: any) => o.id),
-      );
+    if (unsyncedOrders.length) {
+      const now = new Date().toISOString();
+      const { error: syncMarkError } = await context.supabase
+        .from("orders")
+        .update({ sheet_synced_at: now })
+        .in(
+          "id",
+          unsyncedOrders.map((o: any) => o.id),
+        );
+      if (syncMarkError) throw new Error(syncMarkError.message);
+    }
 
-    return { synced: rows.length, configured: true };
+    const statusesUpdated = await reconcileOrderStatuses(
+      spreadsheetId,
+      title,
+      orders.map((order) => ({ order_code: order.order_code, status: order.status })),
+    );
+
+    return { synced: rows.length, statusesUpdated, configured: true };
   });
 
 export const syncOrderStatusToSheet = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderCode: string; status: string }) => input)
   .handler(async ({ data, context }) => {
-    await assertAdmin(context as never);
+    const { data: isAdmin, error: roleError } = await context.supabase.rpc("has_role", {
+      _user_id: context.userId,
+      _role: "admin",
+    });
+    if (roleError || !isAdmin) throw new Error("Forbidden");
 
     const { data: setting } = await context.supabase
       .from("store_settings")

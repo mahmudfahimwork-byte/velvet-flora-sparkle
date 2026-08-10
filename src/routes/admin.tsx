@@ -379,7 +379,11 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     async (silent: boolean) => {
       try {
         const r = await syncNow({});
-        if (!silent && r.configured) toast.success(`${r.synced} order(s) added to your sheet`);
+        if (!silent && r.configured) {
+          toast.success(
+            `${r.synced} order(s) added · ${r.statusesUpdated ?? 0} status update(s) fixed`,
+          );
+        }
       } catch (e) {
         if (!silent) toast.error(e instanceof Error ? e.message : "Sync failed");
       }
