@@ -68,10 +68,9 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   }
 
   async function toggle(p: Product, field: "in_stock" | "featured") {
-    const { error } = await supabase
-      .from("products")
-      .update({ [field]: !p[field] })
-      .eq("id", p.id);
+    const patch =
+      field === "in_stock" ? { in_stock: !p.in_stock } : { featured: !p.featured };
+    const { error } = await supabase.from("products").update(patch).eq("id", p.id);
     if (error) {
       toast.error(error.message);
       return;
