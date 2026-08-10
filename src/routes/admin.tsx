@@ -4,9 +4,12 @@ import type { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import { getSheetSetting, saveSheetSetting, syncOrdersToSheet, syncOrderStatusToSheet } from "@/lib/sheets.functions";
-import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
-
+import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
+import { taka } from "@/lib/shop";
+import type { Order } from "@/lib/orders";
+import { MetricsPanel } from "@/components/admin/MetricsPanel";
+import { OrdersPanel } from "@/components/admin/OrdersPanel";
+import { ProductsPanel } from "@/components/admin/ProductsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -20,25 +23,6 @@ export const Route = createFileRoute("/admin")({
   }),
   component: AdminPage,
 });
-
-type OrderItem = { name: string; qty: number; price: number; slug: string };
-type Order = {
-  id: string;
-  order_code: string;
-  customer_name: string;
-  phone: string;
-  address: string;
-  area: string;
-  notes: string;
-  items: OrderItem[];
-  subtotal: number;
-  delivery_fee: number;
-  total: number;
-  status: string;
-  created_at: string;
-};
-
-const STATUSES = ["new", "confirmed", "shipped", "delivered", "cancelled"] as const;
 
 function AdminPage() {
   const [session, setSession] = useState<Session | null>(null);
@@ -76,7 +60,7 @@ function AdminPage() {
   if (isAdmin === null) return <Shell>Checking access…</Shell>;
   if (!isAdmin) return <ClaimCard onClaimed={checkRole} />;
 
-  return <OrdersDashboard />;
+  return <Dashboard />;
 }
 
 function Shell({ children }: { children: React.ReactNode }) {
@@ -184,10 +168,7 @@ function ClaimCard({ onClaimed }: { onClaimed: () => void }) {
         >
           Claim owner access
         </button>
-        <button
-          onClick={() => supabase.auth.signOut()}
-          className="text-xs text-muted-foreground underline"
-        >
+        <button onClick={() => supabase.auth.signOut()} className="text-xs text-muted-foreground underline">
           Sign out
         </button>
       </div>
@@ -195,11 +176,18 @@ function ClaimCard({ onClaimed }: { onClaimed: () => void }) {
   );
 }
 
-function OrdersDashboard() {
+const TABS = [
+  { key: "overview", label: "Overview" },
+  { key: "orders", label: "Orders" },
+  { key: "products", label: "Products" },
+  { key: "settings", label: "Settings" },
+] as const;
+
+function Dashboard() {
+  const [tab, setTab] = useState<(typeof TABS)[number]["key"]>("overview");
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const pushStatus = useServerFn(syncOrderStatusToSheet);
-
+  const [productCount, setProductCount] = useState(0);
 
   const load = useCallback(async () => {
     const { data, error } = await supabase
@@ -212,6 +200,10 @@ function OrdersDashboard() {
 
   useEffect(() => {
     void load();
+    supabase
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .then(({ count }) => setProductCount(count ?? 0));
   }, [load]);
 
   useEffect(() => {
@@ -245,27 +237,6 @@ function OrdersDashboard() {
     };
   }, []);
 
-  async function updateStatus(id: string, status: string) {
-    const { error } = await supabase.from("orders").update({ status }).eq("id", id);
-    if (error) {
-      toast.error("Could not update the order");
-      return;
-    }
-    const order = orders.find((o) => o.id === id);
-    setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
-    if (order) {
-      try {
-        const r = await pushStatus({ data: { orderCode: order.order_code, status } });
-        if (r.configured && !r.updated) {
-          toast.message("Status saved. That order isn't in your sheet yet — it will be added on the next sync.");
-        }
-      } catch {
-        toast.error("Status saved, but the Google Sheet couldn't be updated.");
-      }
-    }
-  }
-
-
   const newCount = orders.filter((o) => o.status === "new").length;
 
   return (
@@ -273,89 +244,45 @@ function OrdersDashboard() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">Owner dashboard</p>
-          <h1 className="mt-2 text-4xl">Orders</h1>
+          <h1 className="mt-2 text-4xl">Velvet Flora control</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {newCount} new · {orders.length} total. New orders appear here instantly.
+            {newCount} new · {orders.length} total orders. New orders appear here instantly.
           </p>
         </div>
-        <button
-          onClick={() => supabase.auth.signOut()}
-          className="rounded-full border border-border px-5 py-2 text-sm hover:bg-secondary"
-        >
-          Sign out
-        </button>
+        <div className="flex gap-2">
+          <button onClick={() => void load()} className="rounded-full border border-border px-5 py-2 text-sm hover:bg-secondary">
+            Refresh
+          </button>
+          <button
+            onClick={() => supabase.auth.signOut()}
+            className="rounded-full border border-border px-5 py-2 text-sm hover:bg-secondary"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
       <div className="gold-rule my-6" />
 
-      <SheetSyncCard orderCount={orders.length} />
+      <div className="mb-6 flex flex-wrap gap-2">
+        {TABS.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`rounded-full px-5 py-2 text-sm transition-colors ${
+              tab === t.key
+                ? "bg-primary text-primary-foreground"
+                : "border border-border hover:bg-secondary"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
 
-
-
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading orders…</p>
-      ) : orders.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No orders yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {orders.map((o) => (
-            <div key={o.id} className="rounded-xl border border-border bg-card p-5">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <p className="font-display text-xl">{o.order_code}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(o.created_at).toLocaleString("en-GB")}
-                  </p>
-                </div>
-                <select
-                  value={o.status}
-                  onChange={(e) => updateStatus(o.id, e.target.value)}
-                  className="rounded-lg border border-input bg-background px-3 py-2 text-sm capitalize"
-                >
-                  {STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                <div className="text-sm">
-                  <p className="font-semibold">{o.customer_name}</p>
-                  <p className="text-muted-foreground">{o.phone}</p>
-                  <p className="mt-1 text-muted-foreground">{o.address}</p>
-                  <p className="mt-1 text-muted-foreground">
-                    {DELIVERY[o.area as AreaKey]?.label ?? o.area}
-                  </p>
-                  {o.notes && <p className="mt-1 italic text-muted-foreground">“{o.notes}”</p>}
-                </div>
-                <div className="text-sm">
-                  <ul className="space-y-1">
-                    {o.items.map((it, i) => (
-                      <li key={i} className="flex justify-between">
-                        <span>
-                          {it.name} × {it.qty}
-                        </span>
-                        <span>{taka(it.price * it.qty)}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="mt-3 border-t border-border pt-2">
-                    <div className="flex justify-between text-muted-foreground">
-                      <span>Delivery</span>
-                      <span>{taka(o.delivery_fee)}</span>
-                    </div>
-                    <div className="flex justify-between font-semibold">
-                      <span>Total (COD)</span>
-                      <span>{taka(o.total)}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      {tab === "overview" && <MetricsPanel orders={orders} productCount={productCount} />}
+      {tab === "orders" && <OrdersPanel orders={orders} loading={loading} onChange={setOrders} />}
+      {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
+      {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
     </div>
   );
 }
@@ -380,9 +307,7 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
       try {
         const r = await syncNow({});
         if (!silent && r.configured) {
-          toast.success(
-            `${r.synced} order(s) added · ${r.statusesUpdated ?? 0} status update(s) fixed`,
-          );
+          toast.success(`${r.synced} order(s) added · ${r.statusesUpdated ?? 0} status update(s) fixed`);
         }
       } catch (e) {
         if (!silent) toast.error(e instanceof Error ? e.message : "Sync failed");
@@ -450,4 +375,3 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     </div>
   );
 }
-
