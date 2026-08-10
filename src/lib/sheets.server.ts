@@ -1,5 +1,9 @@
 const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets/v4";
 
+function sheetRange(title: string, range: string) {
+  return `'${title.replaceAll("'", "''")}'!${range}`;
+}
+
 function headers() {
   const lovableKey = process.env["LOVABLE_API_KEY"];
   const sheetsKey = process.env["GOOGLE_SHEETS_API_KEY"];
@@ -57,11 +61,11 @@ export async function appendRows(
   title: string,
   rows: (string | number)[][],
 ) {
-  const existing = await call(`/spreadsheets/${spreadsheetId}/values/${title}!A1:L1`);
+  const existing = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:L1")}`);
   const hasHeader = Array.isArray(existing["values"]) && (existing["values"] as unknown[]).length > 0;
   const values = hasHeader ? rows : [HEADER_ROW, ...rows];
   await call(
-    `/spreadsheets/${spreadsheetId}/values/${title}!A1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
+    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:L1")}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
     { method: "POST", body: JSON.stringify({ values }) },
   );
 }
@@ -72,14 +76,45 @@ export async function updateStatusForOrder(
   orderCode: string,
   status: string,
 ): Promise<boolean> {
-  const data = await call(`/spreadsheets/${spreadsheetId}/values/${title}!A1:A10000`);
+  const data = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:A10000")}`);
   const values = (data["values"] as string[][] | undefined) ?? [];
-  const index = values.findIndex((row) => (row?.[0] ?? "").trim() === orderCode);
+  const normalizedCode = orderCode.trim().toUpperCase();
+  const index = values.findIndex(
+    (row) => String(row?.[0] ?? "").trim().toUpperCase() === normalizedCode,
+  );
   if (index === -1) return false;
   const rowNumber = index + 1;
   await call(
-    `/spreadsheets/${spreadsheetId}/values/${title}!K${rowNumber}:K${rowNumber}?valueInputOption=USER_ENTERED`,
+    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, `K${rowNumber}:K${rowNumber}`)}?valueInputOption=USER_ENTERED`,
     { method: "PUT", body: JSON.stringify({ values: [[status]] }) },
   );
   return true;
+}
+
+export async function reconcileOrderStatuses(
+  spreadsheetId: string,
+  title: string,
+  orders: Array<{ order_code: string; status: string }>,
+): Promise<number> {
+  if (!orders.length) return 0;
+
+  const data = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:K10000")}`);
+  const values = (data["values"] as Array<Array<string | number>> | undefined) ?? [];
+  const statusByCode = new Map(
+    orders.map((order) => [order.order_code.trim().toUpperCase(), order.status]),
+  );
+  const updates = values.flatMap((row, index) => {
+    const code = String(row?.[0] ?? "").trim().toUpperCase();
+    const expectedStatus = statusByCode.get(code);
+    if (!expectedStatus || String(row?.[10] ?? "").trim() === expectedStatus) return [];
+    const rowNumber = index + 1;
+    return [{ range: sheetRange(title, `K${rowNumber}:K${rowNumber}`), values: [[expectedStatus]] }];
+  });
+
+  if (!updates.length) return 0;
+  await call(`/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
+    method: "POST",
+    body: JSON.stringify({ valueInputOption: "USER_ENTERED", data: updates }),
+  });
+  return updates.length;
 }
