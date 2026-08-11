@@ -4,7 +4,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
+import { BUNDLE, DELIVERY, bundleDiscount, taka, type AreaKey } from "@/lib/shop";
+import { CartUpsell } from "@/components/site/CartUpsell";
+
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
