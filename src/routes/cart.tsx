@@ -224,7 +224,19 @@ function CartPage() {
 
           <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
             <Row label="Subtotal" value={taka(subtotal)} />
+            {discount > 0 ? (
+              <div className="flex justify-between text-primary">
+                <span>Complete the look ({BUNDLE.percent}% off)</span>
+                <span>−{taka(discount)}</span>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Add {BUNDLE.minPieces - lines.length} more piece
+                {BUNDLE.minPieces - lines.length > 1 ? "s" : ""} to get {BUNDLE.percent}% off your look.
+              </p>
+            )}
             <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
+
             <div className="flex justify-between pt-2 text-base font-semibold">
               <span>Total</span>
               <span>{taka(total)}</span>
