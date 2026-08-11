@@ -139,16 +139,22 @@ function ProductPage() {
         </div>
       </div>
 
-      {related && related.length > 0 && (
-        <section className="mt-24">
-          <h2 className="mb-6 text-2xl">You may also like</h2>
+      <CompleteTheLook product={product} picks={related} />
+
+      {related.length > 0 && (
+        <section className="mt-20">
+          <h2 className="mb-2 text-2xl">Customers also bought</h2>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Ranked by what actually sells alongside this piece.
+          </p>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((p) => (
+            {related.map((p: Product) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
       )}
+
     </div>
   );
 }
