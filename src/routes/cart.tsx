@@ -4,7 +4,9 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
+import { BUNDLE, DELIVERY, bundleDiscount, taka, type AreaKey } from "@/lib/shop";
+import { CartUpsell } from "@/components/site/CartUpsell";
+
 
 export const Route = createFileRoute("/cart")({
   head: () => ({
@@ -43,8 +45,10 @@ function CartPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const discount = bundleDiscount(lines.length, subtotal);
   const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
-  const total = subtotal + deliveryFee;
+  const total = subtotal - discount + deliveryFee;
+
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -73,8 +77,10 @@ function CartPage() {
       area,
       items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
       subtotal,
+      discount,
       delivery_fee: deliveryFee,
       total,
+
     });
 
     setSubmitting(false);
@@ -150,9 +156,12 @@ function CartPage() {
               <p className="text-sm font-semibold">{taka(l.price * l.qty)}</p>
             </div>
           ))}
+
+          <CartUpsell />
         </div>
 
         <form onSubmit={placeOrder} className="rounded-xl border border-border bg-card p-6">
+
           <h2 className="font-display text-2xl">Delivery details</h2>
 
           <div className="mt-5 space-y-4">
@@ -215,7 +224,19 @@ function CartPage() {
 
           <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
             <Row label="Subtotal" value={taka(subtotal)} />
+            {discount > 0 ? (
+              <div className="flex justify-between text-primary">
+                <span>Complete the look ({BUNDLE.percent}% off)</span>
+                <span>−{taka(discount)}</span>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Add {BUNDLE.minPieces - lines.length} more piece
+                {BUNDLE.minPieces - lines.length > 1 ? "s" : ""} to get {BUNDLE.percent}% off your look.
+              </p>
+            )}
             <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
+
             <div className="flex justify-between pt-2 text-base font-semibold">
               <span>Total</span>
               <span>{taka(total)}</span>

@@ -23,9 +23,18 @@ export const DELIVERY = {
 
 export type AreaKey = keyof typeof DELIVERY;
 
+/** "Complete the look": 3 or more different pieces in one order get 10% off. */
+export const BUNDLE = { minPieces: 3, percent: 10 } as const;
+
+export function bundleDiscount(distinctCount: number, subtotal: number) {
+  if (distinctCount < BUNDLE.minPieces) return 0;
+  return Math.round((subtotal * BUNDLE.percent) / 100);
+}
+
 export function taka(amount: number) {
   return `৳${amount.toLocaleString("en-US")}`;
 }
+
 
 export function categoryLabel(key: string) {
   return CATEGORIES.find((c) => c.key === key)?.label ?? key;

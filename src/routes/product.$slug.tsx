@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { categoryLabel, taka, type Product } from "@/lib/shop";
 import { ProductCard } from "@/components/site/ProductCard";
+import { CompleteTheLook } from "@/components/site/CompleteTheLook";
+import { useRecommendations } from "@/lib/recommend";
+
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
@@ -48,20 +51,8 @@ function ProductPage() {
     },
   });
 
-  const { data: related } = useQuery({
-    queryKey: ["products", "related", product?.category, product?.id],
-    enabled: !!product,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("category", product!.category)
-        .neq("id", product!.id)
-        .limit(3);
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
+  const related = useRecommendations(product, 3);
+
 
   if (isLoading) {
     return <p className="mx-auto max-w-6xl px-5 py-20 text-sm text-muted-foreground">Loading…</p>;
@@ -148,16 +139,22 @@ function ProductPage() {
         </div>
       </div>
 
-      {related && related.length > 0 && (
-        <section className="mt-24">
-          <h2 className="mb-6 text-2xl">You may also like</h2>
+      <CompleteTheLook product={product} picks={related} />
+
+      {related.length > 0 && (
+        <section className="mt-20">
+          <h2 className="mb-2 text-2xl">Customers also bought</h2>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Ranked by what actually sells alongside this piece.
+          </p>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {related.map((p) => (
+            {related.map((p: Product) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
         </section>
       )}
+
     </div>
   );
 }
