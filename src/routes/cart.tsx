@@ -43,8 +43,10 @@ function CartPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
+  const discount = bundleDiscount(lines.length, subtotal);
   const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
-  const total = subtotal + deliveryFee;
+  const total = subtotal - discount + deliveryFee;
+
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
