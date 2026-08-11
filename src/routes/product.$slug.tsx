@@ -48,20 +48,8 @@ function ProductPage() {
     },
   });
 
-  const { data: related } = useQuery({
-    queryKey: ["products", "related", product?.category, product?.id],
-    enabled: !!product,
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("category", product!.category)
-        .neq("id", product!.id)
-        .limit(3);
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
+  const related = useRecommendations(product, 3);
+
 
   if (isLoading) {
     return <p className="mx-auto max-w-6xl px-5 py-20 text-sm text-muted-foreground">Loading…</p>;
