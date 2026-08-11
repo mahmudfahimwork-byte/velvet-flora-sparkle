@@ -84,6 +84,7 @@ export type Database = {
           created_at: string
           customer_name: string
           delivery_fee: number
+          discount: number
           id: string
           items: Json
           notes: string
@@ -101,6 +102,7 @@ export type Database = {
           created_at?: string
           customer_name: string
           delivery_fee: number
+          discount?: number
           id?: string
           items?: Json
           notes?: string
@@ -118,6 +120,7 @@ export type Database = {
           created_at?: string
           customer_name?: string
           delivery_fee?: number
+          discount?: number
           id?: string
           items?: Json
           notes?: string
@@ -214,6 +217,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      bought_together: {
+        Args: { _limit?: number; _slug: string }
+        Returns: {
+          score: number
+          slug: string
+        }[]
+      }
       claim_first_admin: { Args: never; Returns: boolean }
       has_role: {
         Args: {
@@ -221,6 +231,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      popular_products: {
+        Args: { _limit?: number }
+        Returns: {
+          score: number
+          slug: string
+        }[]
       }
     }
     Enums: {
