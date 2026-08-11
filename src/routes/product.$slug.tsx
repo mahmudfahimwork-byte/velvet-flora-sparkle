@@ -6,6 +6,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { categoryLabel, taka, type Product } from "@/lib/shop";
 import { ProductCard } from "@/components/site/ProductCard";
+import { CompleteTheLook } from "@/components/site/CompleteTheLook";
+import { useRecommendations } from "@/lib/recommend";
+
 
 export const Route = createFileRoute("/product/$slug")({
   head: ({ params }) => {
