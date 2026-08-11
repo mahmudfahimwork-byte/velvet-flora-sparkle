@@ -77,8 +77,10 @@ function CartPage() {
       area,
       items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
       subtotal,
+      discount,
       delivery_fee: deliveryFee,
       total,
+
     });
 
     setSubmitting(false);
