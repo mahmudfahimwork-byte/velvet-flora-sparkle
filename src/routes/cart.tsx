@@ -156,9 +156,12 @@ function CartPage() {
               <p className="text-sm font-semibold">{taka(l.price * l.qty)}</p>
             </div>
           ))}
+
+          <CartUpsell />
         </div>
 
         <form onSubmit={placeOrder} className="rounded-xl border border-border bg-card p-6">
+
           <h2 className="font-display text-2xl">Delivery details</h2>
 
           <div className="mt-5 space-y-4">
