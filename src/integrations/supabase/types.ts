@@ -14,6 +14,69 @@ export type Database = {
   }
   public: {
     Tables: {
+      coupons: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          discount_type: string
+          expires_at: string | null
+          id: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          discount_type?: string
+          expires_at?: string | null
+          id?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          discount_type?: string
+          expires_at?: string | null
+          id?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          body: string
+          created_at: string
+          email: string
+          id: string
+          is_read: boolean
+          name: string
+          phone: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          name: string
+          phone?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          email?: string
+          id?: string
+          is_read?: boolean
+          name?: string
+          phone?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           address: string
