@@ -32,7 +32,8 @@ export const Route = createFileRoute("/shop")({
 function Shop() {
   const { category } = Route.useSearch();
 
-  const { data, isLoading } = useQuery(productsQuery);
+  const initial = Route.useLoaderData();
+  const { data, isLoading } = useQuery({ ...productsQuery, initialData: initial });
 
   const products = (data ?? []).filter((p) => !category || p.category === category);
 
