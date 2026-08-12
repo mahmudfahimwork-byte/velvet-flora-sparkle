@@ -1,14 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { productsQuery } from "./queries";
 import type { Product } from "./shop";
 
 type ScoreRow = { slug: string; score: number };
-
-async function fetchAllProducts() {
-  const { data, error } = await supabase.from("products").select("*").eq("in_stock", true);
-  if (error) throw error;
-  return (data ?? []) as Product[];
-}
 
 async function fetchBoughtTogether(slug: string) {
   const { data, error } = await supabase.rpc("bought_together", { _slug: slug, _limit: 8 });
@@ -31,13 +26,14 @@ async function fetchPopular() {
 export function useRecommendations(product: Product | null | undefined, limit = 3) {
   const slug = product?.slug ?? "";
 
-  const { data: products } = useQuery({ queryKey: ["products", "in-stock"], queryFn: fetchAllProducts });
+  const { data: products } = useQuery({ ...productsQuery, select: (rows) => rows.filter((p) => p.in_stock) });
   const { data: together } = useQuery({
     queryKey: ["reco", "together", slug],
     queryFn: () => fetchBoughtTogether(slug),
+    staleTime: 10 * 60_000,
     enabled: !!slug,
   });
-  const { data: popular } = useQuery({ queryKey: ["reco", "popular"], queryFn: fetchPopular });
+  const { data: popular } = useQuery({ queryKey: ["reco", "popular"], queryFn: fetchPopular, staleTime: 10 * 60_000 });
 
   if (!product || !products) return [] as Product[];
 
@@ -62,8 +58,8 @@ export function useRecommendations(product: Product | null | undefined, limit = 
 
 /** One smart add-on for the bag, ranked against everything already in it. */
 export function useCartRecommendation(cartSlugs: string[]) {
-  const { data: products } = useQuery({ queryKey: ["products", "in-stock"], queryFn: fetchAllProducts });
-  const { data: popular } = useQuery({ queryKey: ["reco", "popular"], queryFn: fetchPopular });
+  const { data: products } = useQuery({ ...productsQuery, select: (rows) => rows.filter((p) => p.in_stock) });
+  const { data: popular } = useQuery({ queryKey: ["reco", "popular"], queryFn: fetchPopular, staleTime: 10 * 60_000 });
   const anchor = cartSlugs[0] ?? "";
   const { data: together } = useQuery({
     queryKey: ["reco", "together", anchor],

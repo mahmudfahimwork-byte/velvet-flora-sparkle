@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/site/ProductCard";
-import { CATEGORIES, type Product } from "@/lib/shop";
+import { productsQuery } from "@/lib/queries";
+import { CATEGORIES } from "@/lib/shop";
 
 type ShopSearch = { category?: string | undefined };
 
@@ -10,6 +10,7 @@ export const Route = createFileRoute("/shop")({
   validateSearch: (search: Record<string, unknown>): ShopSearch => ({
     category: typeof search['category'] === "string" ? search['category'] : undefined,
   }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
   head: () => ({
     meta: [
       { title: "Shop Bracelets, Pendants & Anklets — Velvet Flora" },
@@ -31,14 +32,7 @@ export const Route = createFileRoute("/shop")({
 function Shop() {
   const { category } = Route.useSearch();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ["products", "all"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("products").select("*").order("created_at");
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
+  const { data, isLoading } = useQuery(productsQuery);
 
   const products = (data ?? []).filter((p) => !category || p.category === category);
 
@@ -79,7 +73,7 @@ function Shop() {
       ) : products.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nothing here yet — check back soon.</p>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
