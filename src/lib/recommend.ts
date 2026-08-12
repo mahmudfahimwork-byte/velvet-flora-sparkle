@@ -56,32 +56,39 @@ export function useRecommendations(product: Product | null | undefined, limit = 
   return picked.slice(0, limit);
 }
 
-/** One smart add-on for the bag, ranked against everything already in it. */
-export function useCartRecommendation(cartSlugs: string[]) {
+/** Ranked add-ons for the bag, ordered by co-purchase then best sellers. */
+export function useCartRecommendations(cartSlugs: string[], limit = 3) {
   const { data: products } = useQuery({ ...productsQuery, select: (rows) => rows.filter((p) => p.in_stock) });
   const { data: popular } = useQuery({ queryKey: ["reco", "popular"], queryFn: fetchPopular, staleTime: 10 * 60_000 });
   const anchor = cartSlugs[0] ?? "";
   const { data: together } = useQuery({
     queryKey: ["reco", "together", anchor],
     queryFn: () => fetchBoughtTogether(anchor),
+    staleTime: 10 * 60_000,
     enabled: !!anchor,
   });
 
-  if (!products?.length) return null;
+  if (!products?.length) return [] as Product[];
 
   const inCart = new Set(cartSlugs);
   const candidates = products.filter((p) => !inCart.has(p.slug));
-  if (!candidates.length) return null;
+  if (!candidates.length) return [] as Product[];
 
   const bySlug = new Map(candidates.map((p) => [p.slug, p]));
+  const picked: Product[] = [];
+  const push = (p?: Product) => {
+    if (p && !picked.some((x) => x.slug === p.slug)) picked.push(p);
+  };
 
-  for (const row of together ?? []) {
-    const hit = bySlug.get(row.slug);
-    if (hit) return hit;
-  }
-  for (const row of popular ?? []) {
-    const hit = bySlug.get(row.slug);
-    if (hit) return hit;
-  }
-  return candidates[0] ?? null;
+  for (const row of together ?? []) push(bySlug.get(row.slug));
+  for (const row of popular ?? []) push(bySlug.get(row.slug));
+  for (const p of candidates) push(p);
+
+  return picked.slice(0, limit);
 }
+
+/** One smart add-on for the bag, ranked against everything already in it. */
+export function useCartRecommendation(cartSlugs: string[]) {
+  return useCartRecommendations(cartSlugs, 1)[0] ?? null;
+}
+
