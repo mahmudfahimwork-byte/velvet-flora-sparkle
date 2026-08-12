@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { BUNDLE, DELIVERY, bundleDiscount, taka, type AreaKey } from "@/lib/shop";
 import { CartUpsell } from "@/components/site/CartUpsell";
+import { UnlockPicks } from "@/components/site/UnlockPicks";
+
 
 
 export const Route = createFileRoute("/cart")({
@@ -230,11 +232,15 @@ function CartPage() {
                 <span>−{taka(discount)}</span>
               </div>
             ) : (
-              <p className="text-xs text-muted-foreground">
-                Add {BUNDLE.minPieces - lines.length} more piece
-                {BUNDLE.minPieces - lines.length > 1 ? "s" : ""} to get {BUNDLE.percent}% off your look.
-              </p>
+              <>
+                <p className="text-xs text-muted-foreground">
+                  Add {BUNDLE.minPieces - lines.length} more piece
+                  {BUNDLE.minPieces - lines.length > 1 ? "s" : ""} to get {BUNDLE.percent}% off your look.
+                </p>
+                <UnlockPicks />
+              </>
             )}
+
             <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
 
             <div className="flex justify-between pt-2 text-base font-semibold">
