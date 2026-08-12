@@ -2,15 +2,17 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
 import { categoryLabel, taka, type Product } from "@/lib/shop";
 import { ProductCard } from "@/components/site/ProductCard";
+import { SmartImage } from "@/components/site/SmartImage";
+import { productsQuery } from "@/lib/queries";
 import { CompleteTheLook } from "@/components/site/CompleteTheLook";
 import { useRecommendations } from "@/lib/recommend";
 
 
 export const Route = createFileRoute("/product/$slug")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
   head: ({ params }) => {
     const title = `${params.slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())} — Velvet Flora`;
     return {
@@ -38,18 +40,8 @@ function ProductPage() {
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
 
-  const { data: product, isLoading } = useQuery({
-    queryKey: ["product", slug],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("slug", slug)
-        .maybeSingle();
-      if (error) throw error;
-      return data as Product | null;
-    },
-  });
+  const { data: products, isLoading } = useQuery(productsQuery);
+  const product = (products ?? []).find((p) => p.slug === slug) ?? null;
 
   const related = useRecommendations(product, 3);
 
@@ -77,8 +69,9 @@ function ProductPage() {
 
       <div className="mt-6 grid gap-10 md:grid-cols-2">
         <div className="overflow-hidden rounded-2xl border border-border bg-secondary">
-          <img
+          <SmartImage
             src={product.image_url}
+            fetchPriority="high"
             alt={product.name}
             width={900}
             height={900}
@@ -147,7 +140,7 @@ function ProductPage() {
           <p className="mb-6 text-sm text-muted-foreground">
             Ranked by what actually sells alongside this piece.
           </p>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
             {related.map((p: Product) => (
               <ProductCard key={p.id} product={p} />
             ))}
