@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
 import { BUNDLE, bundleDiscount, taka, type Product } from "@/lib/shop";
 
@@ -30,7 +31,7 @@ export function CompleteTheLook({ product, picks }: { product: Product; picks: P
               params={{ slug: p.slug }}
               className="flex w-32 flex-col gap-1"
             >
-              <img
+              <SmartImage
                 src={p.image_url}
                 alt={p.name}
                 loading="lazy"

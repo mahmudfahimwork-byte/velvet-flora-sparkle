@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { SmartImage } from "@/components/site/SmartImage";
 import { categoryLabel, taka, type Product } from "@/lib/shop";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -9,7 +10,7 @@ export function ProductCard({ product }: { product: Product }) {
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-[var(--shadow-lift)]"
     >
       <div className="aspect-square overflow-hidden bg-secondary">
-        <img
+        <SmartImage
           src={product.image_url}
           alt={product.name}
           loading="lazy"
@@ -18,7 +19,7 @@ export function ProductCard({ product }: { product: Product }) {
           className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
         />
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-4">
+      <div className="flex flex-1 flex-col gap-1 p-3 sm:p-4">
         <span className="eyebrow">{categoryLabel(product.category)}</span>
         <h3 className="font-display text-lg leading-snug">{product.name}</h3>
         <div className="mt-auto flex items-center justify-between pt-3">

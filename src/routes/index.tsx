@@ -98,7 +98,7 @@ function Index() {
           <p className="eyebrow">Loved this week</p>
           <h2 className="mt-2 text-3xl">Featured pieces</h2>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {(featured ?? []).map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}

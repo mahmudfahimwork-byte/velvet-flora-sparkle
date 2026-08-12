@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
 import { useCartRecommendation } from "@/lib/recommend";
 import { BUNDLE, bundleDiscount, taka } from "@/lib/shop";
@@ -18,7 +19,7 @@ export function CartUpsell() {
     <div className="rounded-xl border border-primary/40 bg-primary/5 p-4">
       <p className="eyebrow">Goes well with your bag</p>
       <div className="mt-3 flex items-center gap-3">
-        <img
+        <SmartImage
           src={pick.image_url}
           alt={pick.name}
           loading="lazy"
