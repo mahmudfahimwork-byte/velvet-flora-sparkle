@@ -40,7 +40,8 @@ function ProductPage() {
   const navigate = useNavigate();
   const [qty, setQty] = useState(1);
 
-  const { data: products, isLoading } = useQuery(productsQuery);
+  const initial = Route.useLoaderData();
+  const { data: products, isLoading } = useQuery({ ...productsQuery, initialData: initial });
   const product = (products ?? []).find((p) => p.slug === slug) ?? null;
 
   const related = useRecommendations(product, 3);
