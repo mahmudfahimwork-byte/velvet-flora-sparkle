@@ -64,14 +64,16 @@ function Index() {
             </div>
           </div>
           <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
-            <img
+            <SmartImage
               src="/images/hero.jpg"
               alt="Gold bracelet, pendant and anklet arranged on blush silk with dried flowers"
               width={1600}
               height={1008}
+              fetchPriority="high"
               className="size-full object-cover"
             />
           </div>
+
         </div>
       </section>
 
