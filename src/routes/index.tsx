@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { ProductCard } from "@/components/site/ProductCard";
-import { CATEGORIES, type Product } from "@/lib/shop";
+import { SmartImage } from "@/components/site/SmartImage";
+import { productsQuery } from "@/lib/queries";
+import { CATEGORIES } from "@/lib/shop";
 
 export const Route = createFileRoute("/")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
   head: () => ({
     meta: [
       { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
@@ -19,23 +21,17 @@ export const Route = createFileRoute("/")({
         content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
       },
     ],
+    links: [
+      { rel: "preload", as: "image", href: "/images/hero.webp", type: "image/webp", fetchpriority: "high" },
+    ],
   }),
   component: Index,
 });
 
 function Index() {
-  const { data: featured } = useQuery({
-    queryKey: ["products", "featured"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .eq("featured", true)
-        .order("created_at");
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
+  const { data: products } = useQuery(productsQuery);
+  const featured = (products ?? []).filter((p) => p.featured);
+
 
   return (
     <div>
