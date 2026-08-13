@@ -92,6 +92,7 @@ export type Database = {
           pathao_consignment_id: string | null
           phone: string
           sheet_synced_at: string | null
+          source: string
           status: string
           subtotal: number
           total: number
@@ -110,6 +111,7 @@ export type Database = {
           pathao_consignment_id?: string | null
           phone: string
           sheet_synced_at?: string | null
+          source?: string
           status?: string
           subtotal: number
           total: number
@@ -128,6 +130,7 @@ export type Database = {
           pathao_consignment_id?: string | null
           phone?: string
           sheet_synced_at?: string | null
+          source?: string
           status?: string
           subtotal?: number
           total?: number
