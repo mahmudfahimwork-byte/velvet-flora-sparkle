@@ -295,6 +295,11 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
   const [sheetId, setSheetId] = useState<string | null>(null);
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
+  const [report, setReport] = useState<{
+    rows: number;
+    statusesPulled: number;
+    unknownCodes: string[];
+  } | null>(null);
 
   useEffect(() => {
     readSetting({})
