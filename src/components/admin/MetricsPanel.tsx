@@ -124,7 +124,9 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
             </ul>
           )}
           <div className="gold-rule my-4" />
-          <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="flex flex-wrap justify-between gap-2 text-sm text-muted-foreground">
+            <span>Website: {m.website}</span>
+            <span>Messenger: {m.messenger}</span>
             <span>Inside Dhaka: {m.inside}</span>
             <span>Outside: {m.outside}</span>
             <span>Cancel rate: {m.cancelRate}%</span>
