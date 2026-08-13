@@ -1,5 +1,31 @@
 const GATEWAY = "https://connector-gateway.lovable.dev/google_sheets/v4";
 
+/** Canonical sheet layout — rebuilt from the database on every sync. */
+export const HEADER_ROW = [
+  "Order",
+  "Date",
+  "Channel",
+  "Customer",
+  "Phone",
+  "Address",
+  "Area",
+  "Items",
+  "Subtotal",
+  "Delivery",
+  "Discount",
+  "Total (COD)",
+  "Status",
+  "Notes",
+] as const;
+
+const LAST_COL = "N";
+const STATUS_COL = "M";
+const CHANNEL_COL = "C";
+const TOTAL_COL = "L";
+const MAX_ROWS = 5000;
+
+const VALID_STATUSES = ["new", "confirmed", "shipped", "delivered", "cancelled"];
+
 function sheetRange(title: string, range: string) {
   return `'${title.replaceAll("'", "''")}'!${range}`;
 }
@@ -41,80 +67,161 @@ export async function getFirstSheetTitle(spreadsheetId: string): Promise<string>
   return sheets?.[0]?.properties?.title ?? "Sheet1";
 }
 
-export const HEADER_ROW = [
-  "Order",
-  "Date",
-  "Customer",
-  "Phone",
-  "Address",
-  "Area",
-  "Items",
-  "Subtotal",
-  "Delivery",
-  "Total (COD)",
-  "Status",
-  "Notes",
-];
-
-export async function appendRows(
-  spreadsheetId: string,
-  title: string,
-  rows: (string | number)[][],
-) {
-  const existing = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:L1")}`);
-  const hasHeader = Array.isArray(existing["values"]) && (existing["values"] as unknown[]).length > 0;
-  const values = hasHeader ? rows : [HEADER_ROW, ...rows];
-  await call(
-    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:L1")}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`,
-    { method: "POST", body: JSON.stringify({ values }) },
+async function readGrid(spreadsheetId: string, title: string): Promise<string[][]> {
+  const data = await call(
+    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, `A1:${LAST_COL}${MAX_ROWS}`)}`,
   );
+  return ((data["values"] as string[][] | undefined) ?? []).map((row) => row ?? []);
 }
 
-export async function updateStatusForOrder(
-  spreadsheetId: string,
-  title: string,
-  orderCode: string,
-  status: string,
-): Promise<boolean> {
-  const data = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:A10000")}`);
-  const values = (data["values"] as string[][] | undefined) ?? [];
-  const normalizedCode = orderCode.trim().toUpperCase();
-  const index = values.findIndex(
-    (row) => String(row?.[0] ?? "").trim().toUpperCase() === normalizedCode,
-  );
-  if (index === -1) return false;
-  const rowNumber = index + 1;
-  await call(
-    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, `K${rowNumber}:K${rowNumber}`)}?valueInputOption=USER_ENTERED`,
-    { method: "PUT", body: JSON.stringify({ values: [[status]] }) },
-  );
-  return true;
+export type SheetOrder = {
+  order_code: string;
+  created_at: string;
+  source: string;
+  customer_name: string;
+  phone: string;
+  address: string;
+  area: string;
+  items: { name: string; qty: number }[];
+  subtotal: number;
+  delivery_fee: number;
+  discount: number;
+  total: number;
+  status: string;
+  notes: string | null;
+};
+
+function channelLabel(source: string) {
+  return source === "messenger" ? "Messenger" : "Website";
 }
 
-export async function reconcileOrderStatuses(
-  spreadsheetId: string,
-  title: string,
-  orders: Array<{ order_code: string; status: string }>,
-): Promise<number> {
-  if (!orders.length) return 0;
+function orderRow(o: SheetOrder): (string | number)[] {
+  return [
+    o.order_code,
+    new Date(o.created_at).toLocaleString("en-GB", { timeZone: "Asia/Dhaka" }),
+    channelLabel(o.source),
+    o.customer_name,
+    o.phone,
+    o.address,
+    o.area === "inside_dhaka" ? "Inside Dhaka" : "Outside Dhaka",
+    (o.items ?? []).map((i) => `${i.name} x${i.qty}`).join(", "),
+    o.subtotal,
+    o.delivery_fee,
+    o.discount ?? 0,
+    o.total,
+    o.status,
+    o.notes ?? "",
+  ];
+}
 
-  const data = await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, "A1:K10000")}`);
-  const values = (data["values"] as Array<Array<string | number>> | undefined) ?? [];
-  const statusByCode = new Map(
-    orders.map((order) => [order.order_code.trim().toUpperCase(), order.status]),
-  );
-  const updates = values.flatMap((row, index) => {
+/**
+ * Reads the statuses currently typed in the sheet, keyed by order code.
+ * Works with the old column layout too by locating the "Status" header.
+ */
+export function statusesFromGrid(grid: string[][]): Map<string, string> {
+  const out = new Map<string, string>();
+  if (!grid.length) return out;
+  const header = (grid[0] ?? []).map((c) => String(c ?? "").trim().toLowerCase());
+  let statusIdx = header.indexOf("status");
+  if (statusIdx === -1) statusIdx = 12; // canonical column M
+  for (const row of grid.slice(1)) {
     const code = String(row?.[0] ?? "").trim().toUpperCase();
-    const expectedStatus = statusByCode.get(code);
-    if (!expectedStatus || String(row?.[10] ?? "").trim() === expectedStatus) return [];
-    const rowNumber = index + 1;
-    return [{ range: sheetRange(title, `K${rowNumber}:K${rowNumber}`), values: [[expectedStatus]] }];
+    if (!/^VF-/.test(code)) continue;
+    const status = String(row?.[statusIdx] ?? "").trim().toLowerCase();
+    if (!VALID_STATUSES.includes(status)) continue;
+    // first occurrence wins; duplicates get collapsed on rewrite
+    if (!out.has(code)) out.set(code, status);
+  }
+  return out;
+}
+
+/** Order codes present in the sheet but unknown to the database. */
+export function unknownCodesFromGrid(grid: string[][], knownCodes: Set<string>): string[] {
+  const seen = new Set<string>();
+  for (const row of grid.slice(1)) {
+    const code = String(row?.[0] ?? "").trim().toUpperCase();
+    if (!/^VF-/.test(code)) continue;
+    if (knownCodes.has(code) || seen.has(code)) continue;
+    seen.add(code);
+  }
+  return [...seen];
+}
+
+function summaryBlock(firstRow: number, lastRow: number) {
+  const codes = `A${firstRow}:A${lastRow}`;
+  const channel = `${CHANNEL_COL}${firstRow}:${CHANNEL_COL}${lastRow}`;
+  const status = `${STATUS_COL}${firstRow}:${STATUS_COL}${lastRow}`;
+  const total = `${TOTAL_COL}${firstRow}:${TOTAL_COL}${lastRow}`;
+  return [
+    ["SUMMARY", ""],
+    ["Total orders", `=COUNTA(${codes})`],
+    ["Website orders", `=COUNTIF(${channel},"Website")`],
+    ["Messenger orders", `=COUNTIF(${channel},"Messenger")`],
+    ["New", `=COUNTIF(${status},"new")`],
+    ["Confirmed", `=COUNTIF(${status},"confirmed")`],
+    ["Shipped", `=COUNTIF(${status},"shipped")`],
+    ["Delivered", `=COUNTIF(${status},"delivered")`],
+    ["Cancelled", `=COUNTIF(${status},"cancelled")`],
+    ["Total amount (all)", `=SUM(${total})`],
+    ["Total amount (excl. cancelled)", `=SUMIF(${status},"<>cancelled",${total})`],
+    ["Delivered amount", `=SUMIF(${status},"delivered",${total})`],
+    [
+      "Cancel ratio",
+      `=IFERROR(ROUND(COUNTIF(${status},"cancelled")/COUNTA(${codes})*100,1)&"%","0%")`,
+    ],
+    ["Last synced", new Date().toLocaleString("en-GB", { timeZone: "Asia/Dhaka" })],
+  ];
+}
+
+/**
+ * Rewrites the whole sheet from the database: one row per order, no duplicates,
+ * followed by a live summary block. Returns what changed.
+ */
+export async function rebuildSheet(
+  spreadsheetId: string,
+  title: string,
+  orders: SheetOrder[],
+  unknownCodes: string[],
+) {
+  const sorted = [...orders].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  );
+  const dataRows = sorted.map(orderRow);
+  const firstRow = 2;
+  const lastRow = firstRow + dataRows.length - 1;
+
+  const values: (string | number)[][] = [[...HEADER_ROW], ...dataRows];
+  // blank spacer row before the summary
+  values.push(new Array(HEADER_ROW.length).fill(""));
+  const summaryStart = values.length + 1;
+  for (const row of summaryBlock(firstRow, Math.max(lastRow, firstRow))) {
+    values.push([row[0] ?? "", row[1] ?? ""]);
+  }
+
+  if (unknownCodes.length) {
+    values.push(new Array(HEADER_ROW.length).fill(""));
+    values.push(["NEEDS ATTENTION — in sheet but not in the store database:"]);
+    values.push([unknownCodes.join(", ")]);
+  }
+
+  const endRow = values.length;
+
+  // Clear everything first so stale/duplicate rows can never survive a rebuild.
+  await call(`/spreadsheets/${spreadsheetId}/values/${sheetRange(title, `A1:${LAST_COL}${MAX_ROWS}`)}:clear`, {
+    method: "POST",
+    body: "{}",
   });
 
-  if (!updates.length) return 0;
-  await call(`/spreadsheets/${spreadsheetId}/values:batchUpdate`, {
-    method: "POST",
-    body: JSON.stringify({ valueInputOption: "USER_ENTERED", data: updates }),
-  });
-  return updates.length;
+  await call(
+    `/spreadsheets/${spreadsheetId}/values/${sheetRange(title, `A1:${LAST_COL}${endRow}`)}?valueInputOption=USER_ENTERED`,
+    { method: "PUT", body: JSON.stringify({ values }) },
+  );
+
+  return { rows: dataRows.length, summaryStart, unknownCodes };
+}
+
+/** Full two-way sync entry point used by the server functions. */
+export async function readSheetState(spreadsheetId: string, title: string) {
+  const grid = await readGrid(spreadsheetId, title);
+  return { grid, sheetStatuses: statusesFromGrid(grid) };
 }
