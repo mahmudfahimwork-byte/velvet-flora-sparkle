@@ -306,8 +306,17 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     async (silent: boolean) => {
       try {
         const r = await syncNow({});
-        if (!silent && r.configured) {
-          toast.success(`${r.synced} order(s) added · ${r.statusesUpdated ?? 0} status update(s) fixed`);
+        if (!r.configured) return;
+        setReport({ rows: r.rows, statusesPulled: r.statusesPulled, unknownCodes: r.unknownCodes });
+        if (!silent) {
+          toast.success(
+            `Sheet rebuilt — ${r.rows} order(s), ${r.statusesPulled} status change(s) pulled from the sheet`,
+          );
+          if (r.unknownCodes.length) {
+            toast.warning(
+              `${r.unknownCodes.length} row(s) in the sheet aren't in the store: ${r.unknownCodes.join(", ")}`,
+            );
+          }
         }
       } catch (e) {
         if (!silent) toast.error(e instanceof Error ? e.message : "Sync failed");
