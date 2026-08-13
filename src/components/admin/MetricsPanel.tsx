@@ -41,6 +41,7 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
       .slice(0, 5);
 
     const inside = orders.filter((o) => o.area === "inside_dhaka").length;
+    const messenger = orders.filter((o) => o.source === "messenger").length;
 
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
