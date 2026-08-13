@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
 import { taka } from "@/lib/shop";
 import type { Order } from "@/lib/orders";
+import { ManualOrderCard } from "@/components/admin/ManualOrderCard";
 import { MetricsPanel } from "@/components/admin/MetricsPanel";
 import { OrdersPanel } from "@/components/admin/OrdersPanel";
 import { ProductsPanel } from "@/components/admin/ProductsPanel";
@@ -280,7 +281,12 @@ function Dashboard() {
       </div>
 
       {tab === "overview" && <MetricsPanel orders={orders} productCount={productCount} />}
-      {tab === "orders" && <OrdersPanel orders={orders} loading={loading} onChange={setOrders} />}
+      {tab === "orders" && (
+        <div className="space-y-4">
+          <ManualOrderCard onAdded={(o) => setOrders((prev) => [o, ...prev])} />
+          <OrdersPanel orders={orders} loading={loading} onChange={setOrders} />
+        </div>
+      )}
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
       {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
     </div>

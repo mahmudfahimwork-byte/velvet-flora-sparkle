@@ -13,6 +13,7 @@ export type Order = {
   delivery_fee: number;
   total: number;
   status: string;
+  source?: string;
   created_at: string;
   sheet_synced_at?: string | null;
 };
