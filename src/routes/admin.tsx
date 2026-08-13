@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { getSheetSetting, saveSheetSetting, syncOrdersToSheet } from "@/lib/sheets.functions";
 import { taka } from "@/lib/shop";
 import type { Order } from "@/lib/orders";
+import { ManualOrderCard } from "@/components/admin/ManualOrderCard";
 import { MetricsPanel } from "@/components/admin/MetricsPanel";
 import { OrdersPanel } from "@/components/admin/OrdersPanel";
 import { ProductsPanel } from "@/components/admin/ProductsPanel";
@@ -280,7 +281,12 @@ function Dashboard() {
       </div>
 
       {tab === "overview" && <MetricsPanel orders={orders} productCount={productCount} />}
-      {tab === "orders" && <OrdersPanel orders={orders} loading={loading} onChange={setOrders} />}
+      {tab === "orders" && (
+        <div className="space-y-4">
+          <ManualOrderCard onAdded={(o) => setOrders((prev) => [o, ...prev])} />
+          <OrdersPanel orders={orders} loading={loading} onChange={setOrders} />
+        </div>
+      )}
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
       {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
     </div>
@@ -295,6 +301,11 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
   const [sheetId, setSheetId] = useState<string | null>(null);
   const [url, setUrl] = useState("");
   const [busy, setBusy] = useState(false);
+  const [report, setReport] = useState<{
+    rows: number;
+    statusesPulled: number;
+    unknownCodes: string[];
+  } | null>(null);
 
   useEffect(() => {
     readSetting({})
@@ -306,8 +317,17 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     async (silent: boolean) => {
       try {
         const r = await syncNow({});
-        if (!silent && r.configured) {
-          toast.success(`${r.synced} order(s) added · ${r.statusesUpdated ?? 0} status update(s) fixed`);
+        if (!r.configured) return;
+        setReport({ rows: r.rows, statusesPulled: r.statusesPulled, unknownCodes: r.unknownCodes });
+        if (!silent) {
+          toast.success(
+            `Sheet rebuilt — ${r.rows} order(s), ${r.statusesPulled} status change(s) pulled from the sheet`,
+          );
+          if (r.unknownCodes.length) {
+            toast.warning(
+              `${r.unknownCodes.length} row(s) in the sheet aren't in the store: ${r.unknownCodes.join(", ")}`,
+            );
+          }
         }
       } catch (e) {
         if (!silent) toast.error(e instanceof Error ? e.message : "Sync failed");
@@ -338,22 +358,44 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     <div className="mb-8 rounded-xl border border-border bg-card p-5">
       <p className="font-display text-xl">Google Sheet</p>
       {sheetId ? (
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <span>Orders are copied to your sheet automatically.</span>
-          <a
-            href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            Open sheet
-          </a>
-          <button onClick={() => runSync(false)} className="underline">
-            Sync now
-          </button>
-          <button onClick={() => setSheetId(null)} className="underline">
-            Change sheet
-          </button>
+        <div className="mt-2 space-y-3 text-sm text-muted-foreground">
+          <p>
+            Every sync rebuilds the sheet from the store: one row per order, no duplicates, a
+            Channel column for Website / Messenger, and a live summary at the bottom. Statuses you
+            edit in the sheet are pulled back into the store first.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              Open sheet
+            </a>
+            <button onClick={() => runSync(false)} className="underline">
+              Sync now
+            </button>
+            <button onClick={() => setSheetId(null)} className="underline">
+              Change sheet
+            </button>
+          </div>
+          {report && (
+            <div className="rounded-lg border border-border bg-background p-3">
+              <p>
+                Sheet holds <strong>{report.rows}</strong> order row(s) — matching the store exactly.
+                {report.statusesPulled > 0 && ` ${report.statusesPulled} status change(s) pulled from the sheet.`}
+              </p>
+              {report.unknownCodes.length > 0 ? (
+                <p className="mt-1 text-destructive">
+                  Mismatch: {report.unknownCodes.join(", ")} exist in the sheet but not in the store
+                  (kept under “Needs attention” at the bottom of the sheet).
+                </p>
+              ) : (
+                <p className="mt-1 text-emerald-700">No mismatches.</p>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <form onSubmit={save} className="mt-3 flex flex-wrap gap-2">

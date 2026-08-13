@@ -41,6 +41,7 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
       .slice(0, 5);
 
     const inside = orders.filter((o) => o.area === "inside_dhaka").length;
+    const messenger = orders.filter((o) => o.source === "messenger").length;
 
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
@@ -64,6 +65,8 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
       topProducts,
       inside,
       outside: orders.length - inside,
+      messenger,
+      website: orders.length - messenger,
       last7,
       cancelRate: orders.length ? Math.round((counts['cancelled']! / orders.length) * 100) : 0,
     };
@@ -124,7 +127,9 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
             </ul>
           )}
           <div className="gold-rule my-4" />
-          <div className="flex justify-between text-sm text-muted-foreground">
+          <div className="flex flex-wrap justify-between gap-2 text-sm text-muted-foreground">
+            <span>Website: {m.website}</span>
+            <span>Messenger: {m.messenger}</span>
             <span>Inside Dhaka: {m.inside}</span>
             <span>Outside: {m.outside}</span>
             <span>Cancel rate: {m.cancelRate}%</span>
