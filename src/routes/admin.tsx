@@ -352,22 +352,44 @@ function SheetSyncCard({ orderCount }: { orderCount: number }) {
     <div className="mb-8 rounded-xl border border-border bg-card p-5">
       <p className="font-display text-xl">Google Sheet</p>
       {sheetId ? (
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          <span>Orders are copied to your sheet automatically.</span>
-          <a
-            href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
-            target="_blank"
-            rel="noreferrer"
-            className="underline"
-          >
-            Open sheet
-          </a>
-          <button onClick={() => runSync(false)} className="underline">
-            Sync now
-          </button>
-          <button onClick={() => setSheetId(null)} className="underline">
-            Change sheet
-          </button>
+        <div className="mt-2 space-y-3 text-sm text-muted-foreground">
+          <p>
+            Every sync rebuilds the sheet from the store: one row per order, no duplicates, a
+            Channel column for Website / Messenger, and a live summary at the bottom. Statuses you
+            edit in the sheet are pulled back into the store first.
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <a
+              href={`https://docs.google.com/spreadsheets/d/${sheetId}/edit`}
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              Open sheet
+            </a>
+            <button onClick={() => runSync(false)} className="underline">
+              Sync now
+            </button>
+            <button onClick={() => setSheetId(null)} className="underline">
+              Change sheet
+            </button>
+          </div>
+          {report && (
+            <div className="rounded-lg border border-border bg-background p-3">
+              <p>
+                Sheet holds <strong>{report.rows}</strong> order row(s) — matching the store exactly.
+                {report.statusesPulled > 0 && ` ${report.statusesPulled} status change(s) pulled from the sheet.`}
+              </p>
+              {report.unknownCodes.length > 0 ? (
+                <p className="mt-1 text-destructive">
+                  Mismatch: {report.unknownCodes.join(", ")} exist in the sheet but not in the store
+                  (kept under “Needs attention” at the bottom of the sheet).
+                </p>
+              ) : (
+                <p className="mt-1 text-emerald-700">No mismatches.</p>
+              )}
+            </div>
+          )}
         </div>
       ) : (
         <form onSubmit={save} className="mt-3 flex flex-wrap gap-2">
