@@ -65,6 +65,8 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
       topProducts,
       inside,
       outside: orders.length - inside,
+      messenger,
+      website: orders.length - messenger,
       last7,
       cancelRate: orders.length ? Math.round((counts['cancelled']! / orders.length) * 100) : 0,
     };
