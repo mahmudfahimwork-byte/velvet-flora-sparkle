@@ -53,6 +53,11 @@ function CartPage() {
   const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
   const total = subtotal - discount + deliveryFee;
 
+  const hasLines = lines.length > 0;
+  useEffect(() => {
+    if (hasLines) pixelTrack("InitiateCheckout", { currency: "BDT" });
+  }, [hasLines]);
+
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
