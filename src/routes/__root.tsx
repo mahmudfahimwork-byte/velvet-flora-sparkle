@@ -15,6 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { initMetaPixel, pixelTrack } from "@/lib/pixel";
+
 
 function NotFoundComponent() {
   return (
@@ -130,6 +132,13 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  useEffect(() => {
+    initMetaPixel();
+    return router.subscribe("onResolved", () => pixelTrack("PageView"));
+  }, [router]);
+
 
   return (
     <QueryClientProvider client={queryClient}>

@@ -1,5 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { pixelTrack } from "@/lib/pixel";
+
 import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,6 +53,11 @@ function CartPage() {
   const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
   const total = subtotal - discount + deliveryFee;
 
+  const hasLines = lines.length > 0;
+  useEffect(() => {
+    if (hasLines) pixelTrack("InitiateCheckout", { currency: "BDT" });
+  }, [hasLines]);
+
 
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
@@ -92,8 +99,18 @@ function CartPage() {
       return;
     }
 
+    pixelTrack("Purchase", {
+      value: total,
+      currency: "BDT",
+      content_type: "product",
+      content_ids: lines.map((l) => l.slug),
+      num_items: lines.reduce((n, l) => n + l.qty, 0),
+      order_id: orderCode,
+    });
+
     clear();
     navigate({ to: "/order-confirmed", search: { code: orderCode } });
+
   }
 
   if (!lines.length) {

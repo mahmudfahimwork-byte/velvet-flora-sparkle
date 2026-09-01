@@ -25,6 +25,41 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadImage(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be under 10MB");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+    });
+    if (error) {
+      setUploading(false);
+      toast.error(error.message);
+      return;
+    }
+    const { data, error: signErr } = await supabase.storage
+      .from("product-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 20);
+    setUploading(false);
+    if (signErr || !data?.signedUrl) {
+      toast.error(signErr?.message ?? "Could not read the uploaded image");
+      return;
+    }
+    setDraft((d) => (d ? { ...d, image_url: data.signedUrl } : d));
+    toast.success("Photo uploaded");
+  }
+
 
   async function load() {
     const { data, error } = await supabase.from("products").select("*").order("created_at");
@@ -147,14 +182,32 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
             />
           </label>
           <label className="text-sm">
-            Image URL
+            Product photo
             <input
-              value={draft.image_url}
-              onChange={(e) => setDraft({ ...draft, image_url: e.target.value })}
-              placeholder="/images/bracelet-1.jpg"
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void uploadImage(file);
+                e.target.value = "";
+              }}
+              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-xs"
             />
+            {uploading && <span className="text-xs text-muted-foreground">Uploading…</span>}
+            {draft.image_url && !uploading && (
+              <span className="mt-2 flex items-center gap-2">
+                <img src={draft.image_url} alt="Product preview" className="size-14 rounded-lg object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setDraft({ ...draft, image_url: "" })}
+                  className="text-xs text-destructive underline"
+                >
+                  Remove
+                </button>
+              </span>
+            )}
           </label>
+
           <label className="text-sm sm:col-span-2">
             Description
             <textarea
