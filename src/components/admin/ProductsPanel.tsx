@@ -147,14 +147,32 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
             />
           </label>
           <label className="text-sm">
-            Image URL
+            Product photo
             <input
-              value={draft.image_url}
-              onChange={(e) => setDraft({ ...draft, image_url: e.target.value })}
-              placeholder="/images/bracelet-1.jpg"
-              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void uploadImage(file);
+                e.target.value = "";
+              }}
+              className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-xs"
             />
+            {uploading && <span className="text-xs text-muted-foreground">Uploading…</span>}
+            {draft.image_url && !uploading && (
+              <span className="mt-2 flex items-center gap-2">
+                <img src={draft.image_url} alt="Product preview" className="size-14 rounded-lg object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setDraft({ ...draft, image_url: "" })}
+                  className="text-xs text-destructive underline"
+                >
+                  Remove
+                </button>
+              </span>
+            )}
           </label>
+
           <label className="text-sm sm:col-span-2">
             Description
             <textarea
