@@ -25,6 +25,41 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+
+  async function uploadImage(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error("Image must be under 10MB");
+      return;
+    }
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const { error } = await supabase.storage.from("product-images").upload(path, file, {
+      cacheControl: "31536000",
+      upsert: false,
+    });
+    if (error) {
+      setUploading(false);
+      toast.error(error.message);
+      return;
+    }
+    const { data, error: signErr } = await supabase.storage
+      .from("product-images")
+      .createSignedUrl(path, 60 * 60 * 24 * 365 * 20);
+    setUploading(false);
+    if (signErr || !data?.signedUrl) {
+      toast.error(signErr?.message ?? "Could not read the uploaded image");
+      return;
+    }
+    setDraft((d) => (d ? { ...d, image_url: data.signedUrl } : d));
+    toast.success("Photo uploaded");
+  }
+
 
   async function load() {
     const { data, error } = await supabase.from("products").select("*").order("created_at");
