@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { pixelTrack } from "@/lib/pixel";
+
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
 import { categoryLabel, taka, type Product } from "@/lib/shop";
@@ -114,6 +116,13 @@ function ProductPage() {
             <button
               onClick={() => {
                 add(product, qty);
+                pixelTrack("AddToCart", {
+                  content_name: product.name,
+                  content_ids: [product.slug],
+                  content_type: "product",
+                  value: product.price * qty,
+                  currency: "BDT",
+                });
                 toast.success(`${product.name} added to your bag`);
               }}
               className="rounded-full border border-border px-6 py-3 text-sm transition-colors hover:bg-secondary"
@@ -123,8 +132,16 @@ function ProductPage() {
             <button
               onClick={() => {
                 add(product, qty);
+                pixelTrack("AddToCart", {
+                  content_name: product.name,
+                  content_ids: [product.slug],
+                  content_type: "product",
+                  value: product.price * qty,
+                  currency: "BDT",
+                });
                 navigate({ to: "/cart" });
               }}
+
               className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
             >
               Order now
