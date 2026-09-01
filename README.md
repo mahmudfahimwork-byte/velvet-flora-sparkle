@@ -1,14 +1,19 @@
-# Welcome to your Lovable project
+# Velvet Flora Boutique
+
+hey lovable, build me a website for my jewellery business name velvet flora. where i will sell girls item mainly bracelets, pendant, anklet,  add product page like in there mostly item i will sell for 500 to 1000 bdt, cod avaible 
+create a website and when a customer order there will be notification for me build it
 
 This project was built with [Lovable](https://lovable.dev).
 
+**Live app**: https://velvet-flora-sparkle.lovable.app
+
 ## Build with Lovable
 
-Open your project in the [Lovable editor](https://lovable.dev) and keep building.
+Continue developing this project in the [Lovable editor](https://lovable.dev/projects/1e45dbb0-d212-418e-980f-f9f1700ad42f).
 
 - **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: connect the project to GitHub and every change made in Lovable is committed straight to your repository.
-- **Full ownership**: this code is yours. Push to your repository and your changes sync back into Lovable, ready for your next prompt.
+- **Stay in sync**: every change made in Lovable is committed straight to this repository.
+- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
 
 ## Development
 
@@ -20,10 +25,3 @@ cd <repository-name>
 npm i
 npm run dev
 ```
-
-## Built with
-
-- TanStack Start
-- TypeScript
-- React
-- Tailwind CSS
