@@ -48,6 +48,20 @@ function ProductPage() {
 
   const related = useRecommendations(product, 3);
 
+  useEffect(() => {
+    if (!product) return;
+    pixelTrack("ViewContent", {
+      content_name: product.name,
+      content_ids: [product.slug],
+      content_type: "product",
+      content_category: product.category,
+      value: product.price,
+      currency: "BDT",
+    });
+  }, [product]);
+
+
+
 
   if (isLoading) {
     return <p className="mx-auto max-w-6xl px-5 py-20 text-sm text-muted-foreground">Loading…</p>;
