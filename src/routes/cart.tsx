@@ -92,8 +92,18 @@ function CartPage() {
       return;
     }
 
+    pixelTrack("Purchase", {
+      value: total,
+      currency: "BDT",
+      content_type: "product",
+      content_ids: lines.map((l) => l.slug),
+      num_items: lines.reduce((n, l) => n + l.qty, 0),
+      order_id: orderCode,
+    });
+
     clear();
     navigate({ to: "/order-confirmed", search: { code: orderCode } });
+
   }
 
   if (!lines.length) {
