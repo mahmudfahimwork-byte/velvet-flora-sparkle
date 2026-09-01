@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { Analytics } from "@vercel/analytics/react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -16,7 +17,6 @@ import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { initMetaPixel, pixelTrack } from "@/lib/pixel";
-
 
 function NotFoundComponent() {
   return (
@@ -94,10 +94,26 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
       { name: "twitter:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
-      { property: "og:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
-      { name: "twitter:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
+      {
+        property: "og:description",
+        content:
+          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+      },
+      {
+        name: "twitter:description",
+        content:
+          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+      },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png",
+      },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -124,6 +140,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <Analytics />
         <Scripts />
       </body>
     </html>
@@ -138,7 +155,6 @@ function RootComponent() {
     initMetaPixel();
     return router.subscribe("onResolved", () => pixelTrack("PageView"));
   }, [router]);
-
 
   return (
     <QueryClientProvider client={queryClient}>
