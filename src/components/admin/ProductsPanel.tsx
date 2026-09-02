@@ -34,16 +34,15 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  async function uploadImage(file: File) {
+  async function uploadOne(file: File): Promise<string | null> {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
-      return;
+      toast.error(`${file.name}: not an image file`);
+      return null;
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be under 10MB");
-      return;
+      toast.error(`${file.name}: must be under 10MB`);
+      return null;
     }
-    setUploading(true);
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file, {
@@ -51,21 +50,52 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       upsert: false,
     });
     if (error) {
-      setUploading(false);
       toast.error(error.message);
-      return;
+      return null;
     }
     const { data, error: signErr } = await supabase.storage
       .from("product-images")
       .createSignedUrl(path, 60 * 60 * 24 * 365 * 20);
-    setUploading(false);
     if (signErr || !data?.signedUrl) {
       toast.error(signErr?.message ?? "Could not read the uploaded image");
-      return;
+      return null;
     }
-    setDraft((d) => (d ? { ...d, image_url: data.signedUrl } : d));
-    toast.success("Photo uploaded");
+    return data.signedUrl;
   }
+
+  async function uploadImages(files: File[]) {
+    setUploading(true);
+    const urls: string[] = [];
+    for (const f of files) {
+      const url = await uploadOne(f);
+      if (url) urls.push(url);
+    }
+    setUploading(false);
+    if (!urls.length) return;
+    setDraft((d) =>
+      d
+        ? { ...d, images: [...d.images, ...urls], image_url: d.image_url || urls[0] }
+        : d,
+    );
+    toast.success(`${urls.length} photo(s) uploaded`);
+  }
+
+  function removeImage(url: string) {
+    setDraft((d) => {
+      if (!d) return d;
+      const images = d.images.filter((u) => u !== url);
+      return { ...d, images, image_url: images[0] ?? "" };
+    });
+  }
+
+  function makeCover(url: string) {
+    setDraft((d) => {
+      if (!d) return d;
+      const images = [url, ...d.images.filter((u) => u !== url)];
+      return { ...d, images, image_url: url };
+    });
+  }
+
 
 
   async function load() {
