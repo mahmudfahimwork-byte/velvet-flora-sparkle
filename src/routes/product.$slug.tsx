@@ -174,3 +174,52 @@ function ProductPage() {
     </div>
   );
 }
+
+function ProductGallery({ product }: { product: Product }) {
+  const gallery = (() => {
+    const list = (product.images ?? []).filter(Boolean);
+    if (list.length) return list;
+    return product.image_url ? [product.image_url] : [];
+  })();
+  const [active, setActive] = useState(0);
+  const current = gallery[Math.min(active, gallery.length - 1)] ?? product.image_url;
+
+  return (
+    <div>
+      <div className="overflow-hidden rounded-2xl border border-border bg-secondary">
+        <SmartImage
+          src={current}
+          fetchPriority="high"
+          alt={product.name}
+          width={900}
+          height={900}
+          className="size-full object-cover"
+        />
+      </div>
+      {gallery.length > 1 && (
+        <div className="mt-3 grid grid-cols-5 gap-2">
+          {gallery.map((url, i) => (
+            <button
+              key={url}
+              type="button"
+              onClick={() => setActive(i)}
+              aria-label={`View photo ${i + 1}`}
+              className={`overflow-hidden rounded-lg border transition-colors ${
+                i === active ? "border-primary" : "border-border hover:border-foreground/30"
+              }`}
+            >
+              <SmartImage
+                src={url}
+                alt={`${product.name} photo ${i + 1}`}
+                loading="lazy"
+                width={200}
+                height={200}
+                className="aspect-square size-full object-cover"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
