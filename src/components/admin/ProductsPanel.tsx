@@ -10,11 +10,18 @@ const EMPTY = {
   price: 700,
   description: "",
   image_url: "",
+  images: [] as string[],
   in_stock: true,
   featured: false,
 };
 
 type Draft = typeof EMPTY & { id?: string };
+
+function galleryOf(p: { image_url: string; images?: string[] | null }) {
+  const list = (p.images ?? []).filter(Boolean);
+  if (list.length) return list;
+  return p.image_url ? [p.image_url] : [];
+}
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
