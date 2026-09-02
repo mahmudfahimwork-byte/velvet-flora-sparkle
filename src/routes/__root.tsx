@@ -16,7 +16,7 @@ import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { initMetaPixel, pixelTrack } from "@/lib/pixel";
-import { initGtag, gtagPageView } from "@/lib/gtag";
+import { initGtag, gtagPageView, GA_MEASUREMENT_ID } from "@/lib/gtag";
 
 
 function NotFoundComponent() {
