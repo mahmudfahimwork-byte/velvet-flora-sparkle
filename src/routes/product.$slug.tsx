@@ -85,16 +85,7 @@ function ProductPage() {
       </Link>
 
       <div className="mt-6 grid gap-10 md:grid-cols-2">
-        <div className="overflow-hidden rounded-2xl border border-border bg-secondary">
-          <SmartImage
-            src={product.image_url}
-            fetchPriority="high"
-            alt={product.name}
-            width={900}
-            height={900}
-            className="size-full object-cover"
-          />
-        </div>
+        <ProductGallery product={product} />
 
         <div>
           <p className="eyebrow">{categoryLabel(product.category)}</p>
