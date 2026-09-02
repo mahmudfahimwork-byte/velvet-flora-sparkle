@@ -219,32 +219,47 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
             />
           </label>
-          <label className="text-sm">
-            Product photo
+          <div className="text-sm sm:col-span-2">
+            Product photos (you can pick several at once)
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void uploadImage(file);
+                const files = Array.from(e.target.files ?? []);
+                if (files.length) void uploadImages(files);
                 e.target.value = "";
               }}
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-xs"
             />
-            {uploading && <span className="text-xs text-muted-foreground">Uploading…</span>}
-            {draft.image_url && !uploading && (
-              <span className="mt-2 flex items-center gap-2">
-                <img src={draft.image_url} alt="Product preview" className="size-14 rounded-lg object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setDraft({ ...draft, image_url: "" })}
-                  className="text-xs text-destructive underline"
-                >
-                  Remove
-                </button>
-              </span>
+            {uploading && <p className="mt-1 text-xs text-muted-foreground">Uploading…</p>}
+            {draft.images.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-3">
+                {draft.images.map((url, i) => (
+                  <div key={url} className="w-20">
+                    <img src={url} alt={`Photo ${i + 1}`} className="size-20 rounded-lg object-cover" />
+                    <div className="mt-1 flex flex-col items-start gap-0.5 text-[11px]">
+                      {i === 0 ? (
+                        <span className="text-primary">Cover</span>
+                      ) : (
+                        <button type="button" onClick={() => makeCover(url)} className="underline">
+                          Make cover
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(url)}
+                        className="text-destructive underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </label>
+          </div>
+
 
           <label className="text-sm sm:col-span-2">
             Description
