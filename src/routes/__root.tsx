@@ -16,7 +16,7 @@ import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { initMetaPixel, pixelTrack } from "@/lib/pixel";
-import { initGtag, gtagPageView } from "@/lib/gtag";
+import { initGtag, gtagPageView, GA_MEASUREMENT_ID } from "@/lib/gtag";
 
 
 function NotFoundComponent() {
@@ -109,6 +109,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         href: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Karla:wght@300;400;500;600&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+    ],
+    scripts: [
+      { src: `https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`, async: true },
+      {
+        children: `window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;gtag('js', new Date());gtag('config', '${GA_MEASUREMENT_ID}');`,
+      },
     ],
   }),
   shellComponent: RootShell,
