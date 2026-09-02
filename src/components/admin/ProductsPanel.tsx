@@ -10,11 +10,18 @@ const EMPTY = {
   price: 700,
   description: "",
   image_url: "",
+  images: [] as string[],
   in_stock: true,
   featured: false,
 };
 
 type Draft = typeof EMPTY & { id?: string };
+
+function galleryOf(p: { image_url: string; images?: string[] | null }) {
+  const list = (p.images ?? []).filter(Boolean);
+  if (list.length) return list;
+  return p.image_url ? [p.image_url] : [];
+}
 
 function slugify(s: string) {
   return s.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -27,16 +34,15 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  async function uploadImage(file: File) {
+  async function uploadOne(file: File): Promise<string | null> {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file");
-      return;
+      toast.error(`${file.name}: not an image file`);
+      return null;
     }
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image must be under 10MB");
-      return;
+      toast.error(`${file.name}: must be under 10MB`);
+      return null;
     }
-    setUploading(true);
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const { error } = await supabase.storage.from("product-images").upload(path, file, {
@@ -44,21 +50,52 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       upsert: false,
     });
     if (error) {
-      setUploading(false);
       toast.error(error.message);
-      return;
+      return null;
     }
     const { data, error: signErr } = await supabase.storage
       .from("product-images")
       .createSignedUrl(path, 60 * 60 * 24 * 365 * 20);
-    setUploading(false);
     if (signErr || !data?.signedUrl) {
       toast.error(signErr?.message ?? "Could not read the uploaded image");
-      return;
+      return null;
     }
-    setDraft((d) => (d ? { ...d, image_url: data.signedUrl } : d));
-    toast.success("Photo uploaded");
+    return data.signedUrl;
   }
+
+  async function uploadImages(files: File[]) {
+    setUploading(true);
+    const urls: string[] = [];
+    for (const f of files) {
+      const url = await uploadOne(f);
+      if (url) urls.push(url);
+    }
+    setUploading(false);
+    if (!urls.length) return;
+    setDraft((d) =>
+      d
+        ? { ...d, images: [...d.images, ...urls], image_url: d.image_url || urls[0] }
+        : d,
+    );
+    toast.success(`${urls.length} photo(s) uploaded`);
+  }
+
+  function removeImage(url: string) {
+    setDraft((d) => {
+      if (!d) return d;
+      const images = d.images.filter((u) => u !== url);
+      return { ...d, images, image_url: images[0] ?? "" };
+    });
+  }
+
+  function makeCover(url: string) {
+    setDraft((d) => {
+      if (!d) return d;
+      const images = [url, ...d.images.filter((u) => u !== url)];
+      return { ...d, images, image_url: url };
+    });
+  }
+
 
 
   async function load() {
@@ -85,7 +122,8 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       category: draft.category,
       price: Number(draft.price),
       description: draft.description,
-      image_url: draft.image_url,
+      image_url: draft.image_url || draft.images[0] || "",
+      images: draft.images.length ? draft.images : draft.image_url ? [draft.image_url] : [],
       in_stock: draft.in_stock,
       featured: draft.featured,
     };
@@ -181,32 +219,47 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
             />
           </label>
-          <label className="text-sm">
-            Product photo
+          <div className="text-sm sm:col-span-2">
+            Product photos (you can pick several at once)
             <input
               type="file"
               accept="image/*"
+              multiple
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void uploadImage(file);
+                const files = Array.from(e.target.files ?? []);
+                if (files.length) void uploadImages(files);
                 e.target.value = "";
               }}
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-xs"
             />
-            {uploading && <span className="text-xs text-muted-foreground">Uploading…</span>}
-            {draft.image_url && !uploading && (
-              <span className="mt-2 flex items-center gap-2">
-                <img src={draft.image_url} alt="Product preview" className="size-14 rounded-lg object-cover" />
-                <button
-                  type="button"
-                  onClick={() => setDraft({ ...draft, image_url: "" })}
-                  className="text-xs text-destructive underline"
-                >
-                  Remove
-                </button>
-              </span>
+            {uploading && <p className="mt-1 text-xs text-muted-foreground">Uploading…</p>}
+            {draft.images.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-3">
+                {draft.images.map((url, i) => (
+                  <div key={url} className="w-20">
+                    <img src={url} alt={`Photo ${i + 1}`} className="size-20 rounded-lg object-cover" />
+                    <div className="mt-1 flex flex-col items-start gap-0.5 text-[11px]">
+                      {i === 0 ? (
+                        <span className="text-primary">Cover</span>
+                      ) : (
+                        <button type="button" onClick={() => makeCover(url)} className="underline">
+                          Make cover
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeImage(url)}
+                        className="text-destructive underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             )}
-          </label>
+          </div>
+
 
           <label className="text-sm sm:col-span-2">
             Description
@@ -282,7 +335,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
                   {p.featured ? "Featured" : "Not featured"}
                 </button>
                 <button
-                  onClick={() => setDraft({ ...p })}
+                  onClick={() => setDraft({ ...p, images: galleryOf(p) })}
                   className="rounded-full border border-border px-3 py-1 hover:bg-secondary"
                 >
                   Edit
