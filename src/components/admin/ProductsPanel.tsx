@@ -335,7 +335,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
                   {p.featured ? "Featured" : "Not featured"}
                 </button>
                 <button
-                  onClick={() => setDraft({ ...p })}
+                  onClick={() => setDraft({ ...p, images: galleryOf(p) })}
                   className="rounded-full border border-border px-3 py-1 hover:bg-secondary"
                 >
                   Edit
