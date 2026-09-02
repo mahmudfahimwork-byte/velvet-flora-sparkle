@@ -122,7 +122,8 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       category: draft.category,
       price: Number(draft.price),
       description: draft.description,
-      image_url: draft.image_url,
+      image_url: draft.image_url || draft.images[0] || "",
+      images: draft.images.length ? draft.images : draft.image_url ? [draft.image_url] : [],
       in_stock: draft.in_stock,
       featured: draft.featured,
     };
