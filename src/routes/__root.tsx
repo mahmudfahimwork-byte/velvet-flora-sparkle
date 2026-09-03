@@ -15,7 +15,8 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { CartProvider } from "@/lib/cart";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
-import { initMetaPixel, pixelTrack } from "@/lib/pixel";
+import { initMetaPixel } from "@/lib/pixel";
+import { track } from "@/lib/track";
 import { initGtag, gtagPageView, GA_MEASUREMENT_ID } from "@/lib/gtag";
 
 
@@ -145,7 +146,7 @@ function RootComponent() {
     initMetaPixel();
     initGtag();
     return router.subscribe("onResolved", () => {
-      pixelTrack("PageView");
+      track("PageView");
       gtagPageView(window.location.pathname + window.location.search);
     });
   }, [router]);

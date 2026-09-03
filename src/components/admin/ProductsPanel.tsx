@@ -74,7 +74,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
     if (!urls.length) return;
     setDraft((d) =>
       d
-        ? { ...d, images: [...d.images, ...urls], image_url: d.image_url || urls[0] }
+        ? { ...d, images: [...d.images, ...urls], image_url: d.image_url || urls[0] || "" }
         : d,
     );
     toast.success(`${urls.length} photo(s) uploaded`);
