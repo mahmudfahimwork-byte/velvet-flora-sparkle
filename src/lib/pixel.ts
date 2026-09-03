@@ -38,5 +38,8 @@ export function initMetaPixel() {
 /** Fires a standard Meta Pixel event. Safe to call anywhere. */
 export function pixelTrack(event: string, data?: Record<string, unknown>) {
   if (typeof window === "undefined" || !window.fbq) return;
-  window.fbq("track", event, data);
+  const { eventID, ...rest } = (data ?? {}) as Record<string, unknown> & { eventID?: string };
+  if (eventID) window.fbq("track", event, rest, { eventID });
+  else window.fbq("track", event, rest);
 }
+
