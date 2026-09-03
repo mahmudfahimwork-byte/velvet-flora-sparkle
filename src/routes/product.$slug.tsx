@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { pixelTrack } from "@/lib/pixel";
+import { track } from "@/lib/track";
 
 import { toast } from "sonner";
 import { useCart } from "@/lib/cart";
@@ -50,7 +50,7 @@ function ProductPage() {
 
   useEffect(() => {
     if (!product) return;
-    pixelTrack("ViewContent", {
+    track("ViewContent", {
       content_name: product.name,
       content_ids: [product.slug],
       content_type: "product",
@@ -121,7 +121,7 @@ function ProductPage() {
             <button
               onClick={() => {
                 add(product, qty);
-                pixelTrack("AddToCart", {
+                track("AddToCart", {
                   content_name: product.name,
                   content_ids: [product.slug],
                   content_type: "product",
@@ -137,7 +137,7 @@ function ProductPage() {
             <button
               onClick={() => {
                 add(product, qty);
-                pixelTrack("AddToCart", {
+                track("AddToCart", {
                   content_name: product.name,
                   content_ids: [product.slug],
                   content_type: "product",

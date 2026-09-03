@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { pixelTrack } from "@/lib/pixel";
+import { track } from "@/lib/track";
 
 import { toast } from "sonner";
 import { z } from "zod";
@@ -55,7 +55,7 @@ function CartPage() {
 
   const hasLines = lines.length > 0;
   useEffect(() => {
-    if (hasLines) pixelTrack("InitiateCheckout", { currency: "BDT" });
+    if (hasLines) track("InitiateCheckout", { currency: "BDT", value: subtotal });
   }, [hasLines]);
 
 
@@ -99,14 +99,22 @@ function CartPage() {
       return;
     }
 
-    pixelTrack("Purchase", {
-      value: total,
-      currency: "BDT",
-      content_type: "product",
-      content_ids: lines.map((l) => l.slug),
-      num_items: lines.reduce((n, l) => n + l.qty, 0),
-      order_id: orderCode,
-    });
+    track(
+      "Purchase",
+      {
+        value: total,
+        currency: "BDT",
+        content_type: "product",
+        content_ids: lines.map((l) => l.slug),
+        num_items: lines.reduce((n, l) => n + l.qty, 0),
+        order_id: orderCode,
+      },
+      {
+        phone: parsed.data.phone,
+        customerName: parsed.data.customer_name,
+        city: area === "inside_dhaka" ? "dhaka" : undefined,
+      },
+    );
 
     clear();
     navigate({ to: "/order-confirmed", search: { code: orderCode } });
