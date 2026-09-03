@@ -3,23 +3,23 @@
 const API_VERSION = "v21.0";
 
 export type CapiUser = {
-  phone?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  city?: string;
-  country?: string;
-  fbp?: string;
-  fbc?: string;
-  ip?: string;
-  userAgent?: string;
+  phone?: string | undefined;
+  email?: string | undefined;
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  city?: string | undefined;
+  country?: string | undefined;
+  fbp?: string | undefined;
+  fbc?: string | undefined;
+  ip?: string | undefined;
+  userAgent?: string | undefined;
 };
 
 export type CapiEvent = {
   eventName: string;
   eventId: string;
-  eventSourceUrl?: string;
-  customData?: Record<string, unknown>;
+  eventSourceUrl?: string | undefined;
+  customData?: Record<string, unknown> | undefined;
   user: CapiUser;
 };
 
@@ -40,16 +40,16 @@ function normalizePhone(raw: string) {
 
 async function buildUserData(user: CapiUser) {
   const data: Record<string, unknown> = {};
-  if (user.phone) data.ph = [await sha256(normalizePhone(user.phone))];
-  if (user.email) data.em = [await sha256(user.email.trim().toLowerCase())];
-  if (user.firstName) data.fn = [await sha256(user.firstName.trim().toLowerCase())];
-  if (user.lastName) data.ln = [await sha256(user.lastName.trim().toLowerCase())];
-  if (user.city) data.ct = [await sha256(user.city.trim().toLowerCase().replace(/\s/g, ""))];
-  data.country = [await sha256((user.country ?? "bd").trim().toLowerCase())];
-  if (user.fbp) data.fbp = user.fbp;
-  if (user.fbc) data.fbc = user.fbc;
-  if (user.ip) data.client_ip_address = user.ip;
-  if (user.userAgent) data.client_user_agent = user.userAgent;
+  if (user.phone) data["ph"] = [await sha256(normalizePhone(user.phone))];
+  if (user.email) data["em"] = [await sha256(user.email.trim().toLowerCase())];
+  if (user.firstName) data["fn"] = [await sha256(user.firstName.trim().toLowerCase())];
+  if (user.lastName) data["ln"] = [await sha256(user.lastName.trim().toLowerCase())];
+  if (user.city) data["ct"] = [await sha256(user.city.trim().toLowerCase().replace(/\s/g, ""))];
+  data["country"] = [await sha256((user.country ?? "bd").trim().toLowerCase())];
+  if (user.fbp) data["fbp"] = user.fbp;
+  if (user.fbc) data["fbc"] = user.fbc;
+  if (user.ip) data["client_ip_address"] = user.ip;
+  if (user.userAgent) data["client_user_agent"] = user.userAgent;
   return data;
 }
 

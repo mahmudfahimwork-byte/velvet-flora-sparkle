@@ -4,7 +4,7 @@ import { trackServerEvent } from "./capi.functions";
 function readCookie(name: string) {
   if (typeof document === "undefined") return undefined;
   const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
-  return match ? decodeURIComponent(match[1]) : undefined;
+  return match?.[1] ? decodeURIComponent(match[1]) : undefined;
 }
 
 function newEventId() {
@@ -19,7 +19,12 @@ type EventName =
   | "Purchase"
   | "Contact";
 
-type Identity = { phone?: string; email?: string; customerName?: string; city?: string };
+type Identity = {
+  phone?: string | undefined;
+  email?: string | undefined;
+  customerName?: string | undefined;
+  city?: string | undefined;
+};
 
 /**
  * Fires one conversion through both the browser pixel and the server-side
