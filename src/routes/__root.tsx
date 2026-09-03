@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "sonner";
+import { Facebook } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -163,6 +164,15 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
+        <a
+          href="https://facebook.com/velvetflorabd"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Velvet Flora on Facebook"
+          className="fixed bottom-5 right-5 z-50 flex size-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-soft transition-transform hover:scale-105 hover:shadow-lift"
+        >
+          <Facebook className="size-6" fill="currentColor" />
+        </a>
         <Toaster position="top-center" richColors />
       </CartProvider>
     </QueryClientProvider>
