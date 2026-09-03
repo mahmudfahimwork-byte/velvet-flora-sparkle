@@ -197,6 +197,57 @@ export type Database = {
         }
         Relationships: []
       }
+      site_visits: {
+        Row: {
+          browser: string
+          campaign: string
+          city: string
+          country: string
+          created_at: string
+          device: string
+          id: string
+          is_new_visitor: boolean
+          page_title: string
+          path: string
+          referrer: string
+          session_id: string
+          source: string
+          visitor_id: string
+        }
+        Insert: {
+          browser?: string
+          campaign?: string
+          city?: string
+          country?: string
+          created_at?: string
+          device?: string
+          id?: string
+          is_new_visitor?: boolean
+          page_title?: string
+          path?: string
+          referrer?: string
+          session_id: string
+          source?: string
+          visitor_id: string
+        }
+        Update: {
+          browser?: string
+          campaign?: string
+          city?: string
+          country?: string
+          created_at?: string
+          device?: string
+          id?: string
+          is_new_visitor?: boolean
+          page_title?: string
+          path?: string
+          referrer?: string
+          session_id?: string
+          source?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       store_settings: {
         Row: {
           key: string
