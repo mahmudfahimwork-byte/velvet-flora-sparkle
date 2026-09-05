@@ -33,6 +33,39 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   const [draft, setDraft] = useState<Draft | null>(null);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [dragId, setDragId] = useState<string | null>(null);
+
+  async function persistOrder(list: Product[]) {
+    setProducts(list);
+    const updates = list.map((p, i) => supabase.from("products").update({ sort_order: i + 1 }).eq("id", p.id));
+    const results = await Promise.all(updates);
+    if (results.some((r) => r.error)) toast.error("Could not save the new order");
+    else toast.success("Order saved");
+  }
+
+  function moveTo(fromId: string, toId: string) {
+    if (fromId === toId) return;
+    const from = products.findIndex((p) => p.id === fromId);
+    const to = products.findIndex((p) => p.id === toId);
+    if (from < 0 || to < 0) return;
+    const next = [...products];
+    const [moved] = next.splice(from, 1);
+    if (!moved) return;
+    next.splice(to, 0, moved);
+    void persistOrder(next);
+  }
+
+  function nudge(id: string, dir: -1 | 1) {
+    const i = products.findIndex((p) => p.id === id);
+    const j = i + dir;
+    if (i < 0 || j < 0 || j >= products.length) return;
+    const next = [...products];
+    const a = next[i]!;
+    const b = next[j]!;
+    next[i] = b;
+    next[j] = a;
+    void persistOrder(next);
+  }
 
   async function uploadOne(file: File): Promise<string | null> {
     if (!file.type.startsWith("image/")) {
@@ -99,7 +132,11 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
 
 
   async function load() {
-    const { data, error } = await supabase.from("products").select("*").order("created_at");
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("sort_order")
+      .order("created_at");
     if (!error && data) {
       setProducts(data as Product[]);
       onCountChange?.(data.length);
@@ -166,7 +203,8 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
     <div className="space-y-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-muted-foreground">
-          {products.length} product(s) · {products.filter((p) => p.in_stock).length} in stock
+          {products.length} product(s) · {products.filter((p) => p.in_stock).length} in stock · hold and drag a
+          product (or use the arrows) to change the order shoppers see
         </p>
         <button
           onClick={() => setDraft({ ...EMPTY })}
@@ -308,7 +346,25 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       ) : (
         <div className="space-y-3">
           {products.map((p) => (
-            <div key={p.id} className="flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4">
+            <div
+              key={p.id}
+              draggable
+              onDragStart={() => setDragId(p.id)}
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (dragId) moveTo(dragId, p.id);
+                setDragId(null);
+              }}
+              onDragEnd={() => setDragId(null)}
+              className={`flex flex-wrap items-center gap-4 rounded-xl border border-border bg-card p-4 ${
+                dragId === p.id ? "opacity-50" : ""
+              } cursor-grab active:cursor-grabbing`}
+            >
+              <div className="flex flex-col text-xs text-muted-foreground">
+                <button type="button" onClick={() => nudge(p.id, -1)} aria-label="Move up" className="px-1">▲</button>
+                <span className="select-none px-1">⠿</span>
+                <button type="button" onClick={() => nudge(p.id, 1)} aria-label="Move down" className="px-1">▼</button>
+              </div>
               <img
                 src={p.image_url}
                 alt={p.name}
