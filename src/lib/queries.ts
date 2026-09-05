@@ -8,7 +8,7 @@ export const productsQuery = queryOptions({
   staleTime: 5 * 60_000,
   gcTime: 30 * 60_000,
   queryFn: async () => {
-    const { data, error } = await supabase.from("products").select("*").order("created_at");
+    const { data, error } = await supabase.from("products").select("*").order("sort_order").order("created_at");
     if (error) throw error;
     return (data ?? []) as Product[];
   },

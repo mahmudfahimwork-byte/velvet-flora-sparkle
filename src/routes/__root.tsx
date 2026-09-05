@@ -18,6 +18,7 @@ import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
 import { initMetaPixel } from "@/lib/pixel";
 import { track } from "@/lib/track";
+import { logPageView } from "@/lib/visits";
 import { initGtag, gtagPageView, GA_MEASUREMENT_ID } from "@/lib/gtag";
 
 
@@ -148,6 +149,7 @@ function RootComponent() {
     initGtag();
     return router.subscribe("onResolved", () => {
       track("PageView");
+      logPageView();
       gtagPageView(window.location.pathname + window.location.search);
     });
   }, [router]);
