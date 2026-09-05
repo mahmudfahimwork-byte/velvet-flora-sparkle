@@ -147,6 +147,7 @@ function RootComponent() {
   useEffect(() => {
     initMetaPixel();
     initGtag();
+    logPageView();
     return router.subscribe("onResolved", () => {
       track("PageView");
       logPageView();

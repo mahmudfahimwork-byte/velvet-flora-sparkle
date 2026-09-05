@@ -51,6 +51,17 @@ export function OrdersPanel({
     }
   }
 
+  async function removeOrder(o: Order) {
+    if (!confirm(`Delete order ${o.order_code}? This cannot be undone.`)) return;
+    const { error } = await supabase.from("orders").delete().eq("id", o.id);
+    if (error) {
+      toast.error("Could not delete that order");
+      return;
+    }
+    onChange((prev) => prev.filter((x) => x.id !== o.id));
+    toast.success(`${o.order_code} deleted`);
+  }
+
   async function bulk(status: string) {
     const ids = visible.filter((o) => o.status !== status).map((o) => o.id);
     if (!ids.length) return;
@@ -150,6 +161,30 @@ export function OrdersPanel({
                       <option key={s} value={s}>{s}</option>
                     ))}
                   </select>
+                  <button
+                    onClick={() => updateStatus(o.id, "confirmed")}
+                    className="rounded-full border border-border px-3 py-2 text-xs hover:bg-secondary"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => updateStatus(o.id, "hold")}
+                    className="rounded-full border border-border px-3 py-2 text-xs text-amber-700 hover:bg-secondary"
+                  >
+                    Hold
+                  </button>
+                  <button
+                    onClick={() => updateStatus(o.id, "delivered")}
+                    className="rounded-full border border-border px-3 py-2 text-xs text-emerald-700 hover:bg-secondary"
+                  >
+                    Delivered
+                  </button>
+                  <button
+                    onClick={() => void removeOrder(o)}
+                    className="rounded-full border border-border px-3 py-2 text-xs text-destructive hover:bg-secondary"
+                  >
+                    Delete
+                  </button>
                   <button
                     onClick={() => setOpen(open === o.id ? null : o.id)}
                     className="rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
