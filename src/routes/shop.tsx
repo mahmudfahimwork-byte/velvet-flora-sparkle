@@ -73,11 +73,41 @@ function Shop() {
         <p className="text-sm text-muted-foreground">Loading pieces…</p>
       ) : products.length === 0 ? (
         <p className="text-sm text-muted-foreground">Nothing here yet — check back soon.</p>
-      ) : (
+      ) : category ? (
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {products.map((p) => (
             <ProductCard key={p.id} product={p} />
           ))}
+        </div>
+      ) : (
+        <div className="space-y-14">
+          {CATEGORIES.map((c) => {
+            const items = products.filter((p) => p.category === c.key);
+            if (items.length === 0) return null;
+            return (
+              <section key={c.key} id={c.key}>
+                <h2 className="mb-1 text-2xl">{c.label}</h2>
+                <p className="mb-5 text-sm text-muted-foreground">{items.length} piece(s)</p>
+                <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+                  {items.map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
+          {products.filter((p) => !CATEGORIES.some((c) => c.key === p.category)).length > 0 && (
+            <section>
+              <h2 className="mb-5 text-2xl">More pieces</h2>
+              <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
+                {products
+                  .filter((p) => !CATEGORIES.some((c) => c.key === p.category))
+                  .map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+              </div>
+            </section>
+          )}
         </div>
       )}
     </div>
