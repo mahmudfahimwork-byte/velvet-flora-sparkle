@@ -11,6 +11,7 @@ import { ManualOrderCard } from "@/components/admin/ManualOrderCard";
 import { MetricsPanel } from "@/components/admin/MetricsPanel";
 import { OrdersPanel } from "@/components/admin/OrdersPanel";
 import { ProductsPanel } from "@/components/admin/ProductsPanel";
+import { VisitorsPanel } from "@/components/admin/VisitorsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -181,6 +182,7 @@ const TABS = [
   { key: "overview", label: "Overview" },
   { key: "orders", label: "Orders" },
   { key: "products", label: "Products" },
+  { key: "visitors", label: "Visitors" },
   { key: "settings", label: "Settings" },
 ] as const;
 
@@ -288,6 +290,7 @@ function Dashboard() {
         </div>
       )}
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
+      {tab === "visitors" && <VisitorsPanel />}
       {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
     </div>
   );

@@ -9,6 +9,7 @@ export type Product = {
   images?: string[] | null;
   in_stock: boolean;
   featured: boolean;
+  sort_order?: number;
 };
 
 export const CATEGORIES = [

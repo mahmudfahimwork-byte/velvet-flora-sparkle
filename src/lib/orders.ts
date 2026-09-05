@@ -21,6 +21,7 @@ export type Order = {
 export const ORDER_STATUSES = [
   "new",
   "confirmed",
+  "hold",
   "shipped",
   "delivered",
   "cancelled",
@@ -31,6 +32,7 @@ export type OrderStatus = (typeof ORDER_STATUSES)[number];
 export const STATUS_TONE: Record<string, string> = {
   new: "bg-primary/15 text-primary",
   confirmed: "bg-accent/20 text-accent-foreground",
+  hold: "bg-amber-500/15 text-amber-700",
   shipped: "bg-secondary text-secondary-foreground",
   delivered: "bg-emerald-500/15 text-emerald-700",
   cancelled: "bg-destructive/10 text-destructive",
