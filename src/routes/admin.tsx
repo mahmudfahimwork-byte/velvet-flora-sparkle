@@ -292,6 +292,7 @@ function Dashboard() {
         </div>
       )}
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
+      {tab === "reviews" && <ReviewsPanel />}
       {tab === "visitors" && <VisitorsPanel />}
       {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
     </div>
