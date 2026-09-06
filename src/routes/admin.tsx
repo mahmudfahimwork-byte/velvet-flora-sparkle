@@ -12,6 +12,7 @@ import { MetricsPanel } from "@/components/admin/MetricsPanel";
 import { OrdersPanel } from "@/components/admin/OrdersPanel";
 import { ProductsPanel } from "@/components/admin/ProductsPanel";
 import { VisitorsPanel } from "@/components/admin/VisitorsPanel";
+import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
