@@ -183,6 +183,7 @@ const TABS = [
   { key: "overview", label: "Overview" },
   { key: "orders", label: "Orders" },
   { key: "products", label: "Products" },
+  { key: "reviews", label: "Reviews" },
   { key: "visitors", label: "Visitors" },
   { key: "settings", label: "Settings" },
 ] as const;
