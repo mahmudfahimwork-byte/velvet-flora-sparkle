@@ -182,6 +182,45 @@ export type Database = {
         }
         Relationships: []
       }
+      reviews: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          image_url: string
+          product_slug: string
+          rating: number
+          sort_order: number
+          updated_at: string
+          visible: boolean
+        }
+        Insert: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          product_slug?: string
+          rating?: number
+          sort_order?: number
+          updated_at?: string
+          visible?: boolean
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          image_url?: string
+          product_slug?: string
+          rating?: number
+          sort_order?: number
+          updated_at?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       site_content: {
         Row: {
           key: string
