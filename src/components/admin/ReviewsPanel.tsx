@@ -97,12 +97,18 @@ export function ReviewsPanel() {
     };
     if (draft.id) {
       const { error } = await supabase.from("reviews").update(payload).eq("id", draft.id);
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
     } else {
       const { error } = await supabase
         .from("reviews")
         .insert({ ...payload, sort_order: reviews.length });
-      if (error) return toast.error(error.message);
+      if (error) {
+        toast.error(error.message);
+        return;
+      }
     }
     setDraft(null);
     toast.success("Review saved");
@@ -121,7 +127,10 @@ export function ReviewsPanel() {
   async function remove(r: Review) {
     if (!confirm("Delete this review?")) return;
     const { error } = await supabase.from("reviews").delete().eq("id", r.id);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     setReviews((prev) => prev.filter((x) => x.id !== r.id));
     toast.success("Review deleted");
   }
