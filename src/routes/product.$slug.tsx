@@ -157,6 +157,8 @@ function ProductPage() {
 
       <CompleteTheLook product={product} picks={related} />
 
+      <ProductReviews slug={product.slug} />
+
       {related.length > 0 && (
         <section className="mt-20">
           <h2 className="mb-2 text-2xl">Customers also bought</h2>
