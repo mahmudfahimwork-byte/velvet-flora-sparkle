@@ -11,6 +11,7 @@ import { SmartImage } from "@/components/site/SmartImage";
 import { productsQuery } from "@/lib/queries";
 import { CompleteTheLook } from "@/components/site/CompleteTheLook";
 import { useRecommendations } from "@/lib/recommend";
+import { ProductReviews } from "@/components/site/ProductReviews";
 
 
 export const Route = createFileRoute("/product/$slug")({
