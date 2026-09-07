@@ -48,6 +48,77 @@ export function OrdersPanel({
   const [filter, setFilter] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Draft | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  function startEdit(o: Order) {
+    setOpen(o.id);
+    setEditing(o.id);
+    setDraft(toDraft(o));
+  }
+
+  function setField<K extends keyof Draft>(k: K, v: Draft[K]) {
+    setDraft((d) => (d ? { ...d, [k]: v } : d));
+  }
+
+  function setItem(idx: number, patch: Partial<OrderItem>) {
+    setDraft((d) =>
+      d ? { ...d, items: d.items.map((it, i) => (i === idx ? { ...it, ...patch } : it)) } : d,
+    );
+  }
+
+  function addItem() {
+    setDraft((d) => (d ? { ...d, items: [...d.items, { name: "", qty: 1, price: 0, slug: "" }] } : d));
+  }
+
+  function removeItem(idx: number) {
+    setDraft((d) => (d ? { ...d, items: d.items.filter((_, i) => i !== idx) } : d));
+  }
+
+  const draftSubtotal = draft
+    ? draft.items.reduce((s, i) => s + num(i.price) * num(i.qty), 0)
+    : 0;
+  const draftTotal = draft
+    ? Math.max(0, draftSubtotal + num(draft.delivery_fee) - num(draft.discount))
+    : 0;
+
+  async function saveEdit(o: Order) {
+    if (!draft) return;
+    if (!draft.customer_name.trim() || !draft.phone.trim() || !draft.address.trim()) {
+      toast.error("Name, phone and address can't be empty");
+      return;
+    }
+    setSaving(true);
+    const patch = {
+      customer_name: draft.customer_name.trim(),
+      phone: draft.phone.trim(),
+      address: draft.address.trim(),
+      area: draft.area,
+      notes: draft.notes,
+      items: draft.items.map((i) => ({
+        name: i.name.trim(),
+        qty: Math.max(1, num(i.qty)),
+        price: Math.max(0, num(i.price)),
+        slug: i.slug ?? "",
+      })),
+      subtotal: draftSubtotal,
+      delivery_fee: num(draft.delivery_fee),
+      discount: num(draft.discount),
+      total: draftTotal,
+    };
+    const { error } = await supabase.from("orders").update(patch as never).eq("id", o.id);
+    setSaving(false);
+    if (error) {
+      toast.error("Could not save those changes");
+      return;
+    }
+    onChange((prev) => prev.map((x) => (x.id === o.id ? { ...x, ...patch } : x)));
+    setEditing(null);
+    setDraft(null);
+    toast.success(`${o.order_code} updated — run a sheet sync to push it`);
+  }
+
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
