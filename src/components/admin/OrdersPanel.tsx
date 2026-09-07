@@ -286,6 +286,12 @@ export function OrdersPanel({
                     Delete
                   </button>
                   <button
+                    onClick={() => (editing === o.id ? (setEditing(null), setDraft(null)) : startEdit(o))}
+                    className="rounded-full border border-border px-3 py-2 text-xs hover:bg-secondary"
+                  >
+                    {editing === o.id ? "Cancel edit" : "Edit"}
+                  </button>
+                  <button
                     onClick={() => setOpen(open === o.id ? null : o.id)}
                     className="rounded-full border border-border px-4 py-2 text-sm hover:bg-secondary"
                   >
@@ -294,7 +300,124 @@ export function OrdersPanel({
                 </div>
               </div>
 
-              {open === o.id && (
+              {editing === o.id && draft && (
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <input
+                    value={draft.customer_name}
+                    onChange={(e) => setField("customer_name", e.target.value)}
+                    placeholder="Customer name"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    value={draft.phone}
+                    onChange={(e) => setField("phone", e.target.value)}
+                    placeholder="Phone"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+                  <input
+                    value={draft.address}
+                    onChange={(e) => setField("address", e.target.value)}
+                    placeholder="Full address"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm sm:col-span-2"
+                  />
+                  <select
+                    value={draft.area}
+                    onChange={(e) => {
+                      const area = e.target.value;
+                      setDraft((d) =>
+                        d
+                          ? { ...d, area, delivery_fee: String(DELIVERY[area as AreaKey]?.fee ?? num(d.delivery_fee)) }
+                          : d,
+                      );
+                    }}
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  >
+                    {Object.entries(DELIVERY).map(([key, v]) => (
+                      <option key={key} value={key}>
+                        {v.label} · {taka(v.fee)}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    value={draft.notes}
+                    onChange={(e) => setField("notes", e.target.value)}
+                    placeholder="Notes"
+                    className="rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  />
+
+                  <div className="space-y-2 sm:col-span-2">
+                    <p className="text-sm font-semibold">Items</p>
+                    {draft.items.map((it, i) => (
+                      <div key={i} className="flex flex-wrap items-center gap-2">
+                        <input
+                          value={it.name}
+                          onChange={(e) => setItem(i, { name: e.target.value })}
+                          placeholder="Item name"
+                          className="min-w-40 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                        />
+                        <input
+                          value={String(it.qty)}
+                          onChange={(e) => setItem(i, { qty: num(e.target.value.replace(/[^\d]/g, "")) })}
+                          inputMode="numeric"
+                          placeholder="Qty"
+                          className="w-20 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                        />
+                        <input
+                          value={String(it.price)}
+                          onChange={(e) => setItem(i, { price: num(e.target.value.replace(/[^\d]/g, "")) })}
+                          inputMode="numeric"
+                          placeholder="Unit price ৳"
+                          className="w-28 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                        />
+                        <button
+                          onClick={() => removeItem(i)}
+                          className="rounded-full border border-border px-3 py-2 text-xs text-destructive hover:bg-secondary"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                    <button
+                      onClick={addItem}
+                      className="rounded-full border border-border px-4 py-2 text-xs hover:bg-secondary"
+                    >
+                      + Add item
+                    </button>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-2 sm:col-span-2">
+                    <label className="text-sm text-muted-foreground">Delivery ৳</label>
+                    <input
+                      value={draft.delivery_fee}
+                      onChange={(e) => setField("delivery_fee", e.target.value.replace(/[^\d]/g, ""))}
+                      inputMode="numeric"
+                      className="w-24 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    />
+                    <label className="text-sm text-muted-foreground">Discount ৳</label>
+                    <input
+                      value={draft.discount}
+                      onChange={(e) => setField("discount", e.target.value.replace(/[^\d]/g, ""))}
+                      inputMode="numeric"
+                      className="w-24 rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-between gap-3 sm:col-span-2">
+                    <p className="text-sm text-muted-foreground">
+                      Subtotal {taka(draftSubtotal)} · Total {taka(draftTotal)}
+                    </p>
+                    <button
+                      onClick={() => void saveEdit(o)}
+                      disabled={saving}
+                      className="rounded-full bg-primary px-5 py-2 text-sm font-medium text-primary-foreground disabled:opacity-60"
+                    >
+                      {saving ? "Saving…" : "Save changes"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {open === o.id && editing !== o.id && (
                 <div className="mt-4 grid gap-4 sm:grid-cols-2">
                   <div className="text-sm">
                     <p className="font-semibold">{o.customer_name}</p>
