@@ -3,7 +3,8 @@ import { toast } from "sonner";
 import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
 import { useCartRecommendations } from "@/lib/recommend";
-import { BUNDLE, bundleDiscount, taka } from "@/lib/shop";
+import { taka } from "@/lib/shop";
+import { useBundle } from "@/lib/bundle";
 
 /**
  * Compact quick-add row shown next to the "add N more piece" nudge in the
@@ -15,19 +16,20 @@ export function UnlockPicks() {
     lines.map((l) => l.slug),
     3,
   );
-  if (!picks.length) return null;
+  const bundle = useBundle();
+  if (!picks.length || !bundle.enabled) return null;
 
   const distinct = lines.length;
-  const currentSaving = bundleDiscount(distinct, subtotal);
+  const currentSaving = bundle.discount(distinct, subtotal);
 
   return (
     <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3">
-      <p className="text-xs font-medium text-primary">Quick add to unlock {BUNDLE.percent}% off</p>
+      <p className="text-xs font-medium text-primary">Quick add to unlock {bundle.percent}% off</p>
       <div className="mt-2 space-y-2">
         {picks.map((p) => {
           const extra = Math.max(
             0,
-            bundleDiscount(distinct + 1, subtotal + p.price) - currentSaving,
+            bundle.discount(distinct + 1, subtotal + p.price) - currentSaving,
           );
           return (
             <div key={p.id} className="flex items-center gap-2">

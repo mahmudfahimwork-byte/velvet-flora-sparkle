@@ -13,6 +13,7 @@ import { OrdersPanel } from "@/components/admin/OrdersPanel";
 import { ProductsPanel } from "@/components/admin/ProductsPanel";
 import { VisitorsPanel } from "@/components/admin/VisitorsPanel";
 import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
+import { BundlePanel } from "@/components/admin/BundlePanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -294,7 +295,12 @@ function Dashboard() {
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
       {tab === "reviews" && <ReviewsPanel />}
       {tab === "visitors" && <VisitorsPanel />}
-      {tab === "settings" && <SheetSyncCard orderCount={orders.length} />}
+      {tab === "settings" && (
+        <div className="space-y-4">
+          <SheetSyncCard orderCount={orders.length} />
+          <BundlePanel />
+        </div>
+      )}
     </div>
   );
 }

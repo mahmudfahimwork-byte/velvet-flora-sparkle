@@ -6,7 +6,10 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { BUNDLE, DELIVERY, bundleDiscount, taka, type AreaKey } from "@/lib/shop";
+import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
+import { useBundle } from "@/lib/bundle";
+import { useQuery } from "@tanstack/react-query";
+import { productsQuery } from "@/lib/queries";
 import { CartUpsell } from "@/components/site/CartUpsell";
 import { UnlockPicks } from "@/components/site/UnlockPicks";
 
@@ -49,7 +52,13 @@ function CartPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const discount = bundleDiscount(lines.length, subtotal);
+  const bundle = useBundle();
+  const { data: catalog } = useQuery(productsQuery);
+  const soldOutSlugs = new Set(
+    (catalog ?? []).filter((p) => !p.in_stock).map((p) => p.slug),
+  );
+  const soldOutLines = lines.filter((l) => soldOutSlugs.has(l.slug));
+  const discount = bundle.discount(lines.length, subtotal);
   const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
   const total = subtotal - discount + deliveryFee;
 
@@ -62,6 +71,12 @@ function CartPage() {
   async function placeOrder(e: React.FormEvent) {
     e.preventDefault();
     if (!lines.length) return;
+    if (soldOutLines.length) {
+      toast.error(
+        `${soldOutLines.map((l) => l.name).join(", ")} is sold out — please remove it to continue.`,
+      );
+      return;
+    }
 
     const parsed = checkoutSchema.safeParse(form);
     if (!parsed.success) {
@@ -162,6 +177,11 @@ function CartPage() {
               <div className="flex-1">
                 <p className="font-display text-lg">{l.name}</p>
                 <p className="text-sm text-muted-foreground">{taka(l.price)} each</p>
+                {soldOutSlugs.has(l.slug) && (
+                  <p className="mt-1 text-xs font-medium text-destructive">
+                    Sold out — please remove this to place your order
+                  </p>
+                )}
                 <div className="mt-2 flex items-center gap-3">
                   <div className="flex items-center rounded-full border border-border text-sm">
                     <button className="px-3 py-1" onClick={() => setQty(l.id, l.qty - 1)}>
@@ -253,15 +273,17 @@ function CartPage() {
             <Row label="Subtotal" value={taka(subtotal)} />
             {discount > 0 ? (
               <div className="flex justify-between text-primary">
-                <span>Complete the look ({BUNDLE.percent}% off)</span>
+                <span>Complete the look ({bundle.percent}% off)</span>
                 <span>−{taka(discount)}</span>
               </div>
             ) : (
               <>
-                <p className="text-xs text-muted-foreground">
-                  Add {BUNDLE.minPieces - lines.length} more piece
-                  {BUNDLE.minPieces - lines.length > 1 ? "s" : ""} to get {BUNDLE.percent}% off your look.
-                </p>
+                {bundle.enabled && bundle.minPieces > lines.length && (
+                  <p className="text-xs text-muted-foreground">
+                    Add {bundle.minPieces - lines.length} more piece
+                    {bundle.minPieces - lines.length > 1 ? "s" : ""} to get {bundle.percent}% off your look.
+                  </p>
+                )}
                 <UnlockPicks />
               </>
             )}
@@ -279,7 +301,7 @@ function CartPage() {
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || soldOutLines.length > 0}
             className="mt-5 w-full rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
           >
             {submitting ? "Placing order…" : `Confirm order · ${taka(total)}`}

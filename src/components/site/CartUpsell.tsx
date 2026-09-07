@@ -3,16 +3,18 @@ import { toast } from "sonner";
 import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
 import { useCartRecommendation } from "@/lib/recommend";
-import { BUNDLE, bundleDiscount, taka } from "@/lib/shop";
+import { taka } from "@/lib/shop";
+import { useBundle } from "@/lib/bundle";
 
 export function CartUpsell() {
   const { lines, add, subtotal } = useCart();
   const pick = useCartRecommendation(lines.map((l) => l.slug));
+  const bundle = useBundle();
   if (!pick || !lines.length) return null;
 
   const distinct = lines.length;
-  const currentSaving = bundleDiscount(distinct, subtotal);
-  const nextSaving = bundleDiscount(distinct + 1, subtotal + pick.price);
+  const currentSaving = bundle.discount(distinct, subtotal);
+  const nextSaving = bundle.discount(distinct + 1, subtotal + pick.price);
   const extraSaving = Math.max(0, nextSaving - currentSaving);
 
   return (
@@ -32,7 +34,7 @@ export function CartUpsell() {
           <p className="text-sm text-muted-foreground">{taka(pick.price)}</p>
           {extraSaving > 0 ? (
             <p className="mt-1 text-xs text-primary">
-              Add this and unlock {BUNDLE.percent}% off — you save {taka(extraSaving)}
+              Add this and unlock {bundle.percent}% off — you save {taka(extraSaving)}
             </p>
           ) : (
             <p className="mt-1 text-xs text-muted-foreground">
