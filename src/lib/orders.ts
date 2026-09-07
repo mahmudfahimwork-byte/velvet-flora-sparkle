@@ -11,6 +11,7 @@ export type Order = {
   items: OrderItem[];
   subtotal: number;
   delivery_fee: number;
+  discount?: number;
   total: number;
   status: string;
   source?: string;
