@@ -2,21 +2,24 @@ import { Link } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
-import { BUNDLE, bundleDiscount, taka, type Product } from "@/lib/shop";
+import { taka, type Product } from "@/lib/shop";
+import { useBundle } from "@/lib/bundle";
 
 export function CompleteTheLook({ product, picks }: { product: Product; picks: Product[] }) {
   const { add } = useCart();
-  const set = [product, ...picks].slice(0, BUNDLE.minPieces);
-  if (set.length < BUNDLE.minPieces) return null;
+  const bundle = useBundle();
+  const pool = [product, ...picks].filter((p) => p.in_stock);
+  const set = pool.slice(0, bundle.minPieces);
+  if (!bundle.enabled || set.length < bundle.minPieces) return null;
 
   const subtotal = set.reduce((s, p) => s + p.price, 0);
-  const saving = bundleDiscount(set.length, subtotal);
+  const saving = bundle.discount(set.length, subtotal);
 
   return (
     <section className="mt-16 rounded-2xl border border-primary/40 bg-primary/5 p-6">
       <p className="eyebrow">Complete the look</p>
       <h2 className="mt-1 font-display text-2xl">
-        Style all three and save {BUNDLE.percent}%
+        Style all {bundle.minPieces} and save {bundle.percent}%
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
         Chosen from what customers most often buy together with this piece.
@@ -57,7 +60,7 @@ export function CompleteTheLook({ product, picks }: { product: Product; picks: P
         <button
           onClick={() => {
             set.forEach((p) => add(p, 1));
-            toast.success(`Look added — ${BUNDLE.percent}% off applied in your bag`);
+            toast.success(`Look added — ${bundle.percent}% off applied in your bag`);
           }}
           className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
