@@ -101,6 +101,22 @@ function ProductPage() {
             <li>· Delivered within 2–4 days</li>
           </ul>
 
+          {!product.in_stock ? (
+            <div className="mt-8">
+              <span className="inline-block rounded-full bg-destructive/10 px-5 py-3 text-sm font-medium text-destructive">
+                Sold out — currently unavailable
+              </span>
+              <p className="mt-3 text-sm text-muted-foreground">
+                This piece is out of stock right now. Please check back soon or browse other pieces.
+              </p>
+              <Link
+                to="/shop"
+                className="mt-5 inline-block rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground"
+              >
+                Browse the shop
+              </Link>
+            </div>
+          ) : (
           <div className="mt-8 flex items-center gap-3">
             <div className="flex items-center rounded-full border border-border">
               <button
@@ -153,6 +169,8 @@ function ProductPage() {
               Order now
             </button>
           </div>
+          )}
+
         </div>
       </div>
 
