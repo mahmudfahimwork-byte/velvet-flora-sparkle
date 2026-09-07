@@ -4,7 +4,36 @@ import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { syncOrderStatusToSheet } from "@/lib/sheets.functions";
 import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
-import { ORDER_STATUSES, STATUS_TONE, type Order } from "@/lib/orders";
+import { ORDER_STATUSES, STATUS_TONE, type Order, type OrderItem } from "@/lib/orders";
+
+type Draft = {
+  customer_name: string;
+  phone: string;
+  address: string;
+  area: string;
+  notes: string;
+  items: OrderItem[];
+  delivery_fee: string;
+  discount: string;
+};
+
+function toDraft(o: Order): Draft {
+  return {
+    customer_name: o.customer_name ?? "",
+    phone: o.phone ?? "",
+    address: o.address ?? "",
+    area: o.area ?? "inside_dhaka",
+    notes: o.notes ?? "",
+    items: (o.items ?? []).map((i) => ({ ...i })),
+    delivery_fee: String(o.delivery_fee ?? 0),
+    discount: String(o.discount ?? 0),
+  };
+}
+
+function num(v: string | number) {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+}
 
 export function OrdersPanel({
   orders,
