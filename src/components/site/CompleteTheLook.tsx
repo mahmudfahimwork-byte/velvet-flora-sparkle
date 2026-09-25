@@ -18,7 +18,9 @@ function seededShuffle<T>(items: T[], seed: string): T[] {
   for (let i = arr.length - 1; i > 0; i--) {
     h = Math.imul(h ^ (h >>> 15), 2246822519);
     const j = Math.abs(h) % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    const tmp = arr[i] as T;
+    arr[i] = arr[j] as T;
+    arr[j] = tmp;
   }
   return arr;
 }
