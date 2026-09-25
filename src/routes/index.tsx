@@ -3,10 +3,15 @@ import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/site/ProductCard";
 import { SmartImage } from "@/components/site/SmartImage";
 import { productsQuery } from "@/lib/queries";
+import { contentQuery } from "@/lib/content";
 import { CATEGORIES } from "@/lib/shop";
+import { useText } from "@/lib/content";
 
 export const Route = createFileRoute("/")({
-  loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
+  loader: async ({ context }) => {
+    context.queryClient.prefetchQuery(contentQuery);
+    return context.queryClient.ensureQueryData(productsQuery).catch(() => undefined);
+  },
   head: () => ({
     meta: [
       { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
@@ -29,8 +34,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const t = useText();
   const initial = Route.useLoaderData();
-  const { data: products } = useQuery({ ...productsQuery, initialData: initial });
+  const { data: products } = useQuery({ ...productsQuery, initialData: initial ?? undefined });
   const featured = (products ?? []).filter((p) => p.featured);
 
 
@@ -39,28 +45,27 @@ function Index() {
       <section className="relative overflow-hidden">
         <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 md:grid-cols-2 md:py-24">
           <div>
-            <p className="eyebrow">Velvet Flora · Bangladesh</p>
+            <p className="eyebrow">{t("home.eyebrow")}</p>
             <h1 className="mt-4 text-5xl leading-[1.05] md:text-6xl">
-              Little pieces that
-              <span className="block italic text-primary">bloom on you.</span>
+              {t("home.title1")}
+              <span className="block italic text-primary">{t("home.title2")}</span>
             </h1>
             <div className="gold-rule my-6" />
             <p className="max-w-md text-muted-foreground">
-              Bracelets, pendants and anklets picked for soft everyday wear — mostly ৳500 to
-              ৳1000, with cash on delivery anywhere in Bangladesh.
+              {t("home.intro")}
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/shop"
                 className="rounded-full bg-primary px-7 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
               >
-                Shop the collection
+                {t("home.cta1")}
               </Link>
               <Link
                 to="/about"
                 className="rounded-full border border-border px-7 py-3 text-sm transition-colors hover:bg-secondary"
               >
-                Our story
+                {t("home.cta2")}
               </Link>
             </div>
           </div>
@@ -96,8 +101,8 @@ function Index() {
 
       <section className="mx-auto max-w-6xl px-5 pt-20">
         <div className="mb-8 text-center">
-          <p className="eyebrow">Loved this week</p>
-          <h2 className="mt-2 text-3xl">Featured pieces</h2>
+          <p className="eyebrow">{t("home.featured.eyebrow")}</p>
+          <h2 className="mt-2 text-3xl">{t("home.featured.title")}</h2>
         </div>
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
           {(featured ?? []).map((p) => (
@@ -109,7 +114,7 @@ function Index() {
             to="/shop"
             className="rounded-full border border-border px-7 py-3 text-sm transition-colors hover:bg-secondary"
           >
-            View all jewellery
+            {t("home.featured.cta")}
           </Link>
         </div>
       </section>
@@ -117,9 +122,9 @@ function Index() {
       <section className="mx-auto mt-24 max-w-6xl px-5">
         <div className="grid gap-6 rounded-2xl bg-secondary/60 p-10 sm:grid-cols-3">
           {[
-            { t: "Cash on delivery", d: "Pay the courier when your parcel arrives." },
-            { t: "Nationwide delivery", d: "Inside Dhaka ৳60 · Outside Dhaka ৳120." },
-            { t: "Gift ready", d: "Every order is packed in a little gift pouch." },
+            { t: t("home.promise1.title"), d: t("home.promise1.text") },
+            { t: t("home.promise2.title"), d: t("home.promise2.text") },
+            { t: t("home.promise3.title"), d: t("home.promise3.text") },
           ].map((f) => (
             <div key={f.t}>
               <h3 className="font-display text-xl">{f.t}</h3>

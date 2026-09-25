@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { ProductCard } from "@/components/site/ProductCard";
 import { productsQuery } from "@/lib/queries";
 import { CATEGORIES } from "@/lib/shop";
+import { useText } from "@/lib/content";
 
 type ShopSearch = { category?: string | undefined };
 
@@ -30,6 +31,7 @@ export const Route = createFileRoute("/shop")({
 });
 
 function Shop() {
+  const t = useText();
   const { category } = Route.useSearch();
 
   const initial = Route.useLoaderData();
@@ -39,8 +41,8 @@ function Shop() {
 
   return (
     <div className="mx-auto max-w-6xl px-5 py-14">
-      <p className="eyebrow">The collection</p>
-      <h1 className="mt-2 text-4xl">Shop all</h1>
+      <p className="eyebrow">{t("shop.eyebrow")}</p>
+      <h1 className="mt-2 text-4xl">{t("shop.title")}</h1>
       <div className="gold-rule my-5" />
 
       <div className="mb-10 flex flex-wrap gap-2">
