@@ -147,6 +147,7 @@ export type Database = {
           image_url: string
           images: string[]
           in_stock: boolean
+          look_slugs: string[]
           name: string
           price: number
           slug: string
@@ -161,6 +162,7 @@ export type Database = {
           image_url?: string
           images?: string[]
           in_stock?: boolean
+          look_slugs?: string[]
           name: string
           price: number
           slug: string
@@ -175,6 +177,7 @@ export type Database = {
           image_url?: string
           images?: string[]
           in_stock?: boolean
+          look_slugs?: string[]
           name?: string
           price?: number
           slug?: string
