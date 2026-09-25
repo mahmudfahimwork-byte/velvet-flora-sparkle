@@ -13,6 +13,7 @@ const EMPTY = {
   images: [] as string[],
   in_stock: true,
   featured: false,
+  look_slugs: [] as string[],
 };
 
 type Draft = typeof EMPTY & { id?: string };
@@ -163,6 +164,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       images: draft.images.length ? draft.images : draft.image_url ? [draft.image_url] : [],
       in_stock: draft.in_stock,
       featured: draft.featured,
+      look_slugs: draft.look_slugs,
     };
     const { error } = draft.id
       ? await supabase.from("products").update(payload).eq("id", draft.id)
@@ -308,6 +310,40 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
             />
           </label>
+          <div className="text-sm sm:col-span-2">
+            <p>Complete the look — pieces shown with this product</p>
+            <p className="text-xs text-muted-foreground">
+              Tick the pieces you want. Leave all unticked to let the site pick automatically.
+            </p>
+            <div className="mt-2 grid max-h-56 grid-cols-1 gap-1 overflow-y-auto rounded-lg border border-input p-2 sm:grid-cols-2">
+              {products
+                .filter((p) => p.id !== draft.id)
+                .map((p) => {
+                  const on = draft.look_slugs.includes(p.slug);
+                  return (
+                    <label key={p.id} className="flex items-center gap-2 rounded px-1 py-1 hover:bg-secondary">
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() =>
+                          setDraft({
+                            ...draft,
+                            look_slugs: on
+                              ? draft.look_slugs.filter((s) => s !== p.slug)
+                              : [...draft.look_slugs, p.slug],
+                          })
+                        }
+                      />
+                      <span className="line-clamp-1">{p.name}</span>
+                      {!p.in_stock && <span className="text-xs text-destructive">sold out</span>}
+                    </label>
+                  );
+                })}
+            </div>
+            {draft.look_slugs.length > 0 && (
+              <p className="mt-1 text-xs text-muted-foreground">{draft.look_slugs.length} selected</p>
+            )}
+          </div>
           <div className="flex items-center gap-5 text-sm sm:col-span-2">
             <label className="flex items-center gap-2">
               <input
@@ -391,7 +427,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
                   {p.featured ? "Featured" : "Not featured"}
                 </button>
                 <button
-                  onClick={() => setDraft({ ...p, images: galleryOf(p) })}
+                  onClick={() => setDraft({ ...p, images: galleryOf(p), look_slugs: p.look_slugs ?? [] })}
                   className="rounded-full border border-border px-3 py-1 hover:bg-secondary"
                 >
                   Edit

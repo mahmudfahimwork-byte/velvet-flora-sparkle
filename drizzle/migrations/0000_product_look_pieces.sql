@@ -1,0 +1,1 @@
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS look_slugs text[] NOT NULL DEFAULT '{}';

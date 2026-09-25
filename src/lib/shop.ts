@@ -10,6 +10,7 @@ export type Product = {
   in_stock: boolean;
   featured: boolean;
   sort_order?: number;
+  look_slugs?: string[] | null;
 };
 
 export const CATEGORIES = [
