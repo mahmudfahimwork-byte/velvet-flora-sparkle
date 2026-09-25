@@ -65,16 +65,18 @@ export function CompleteTheLook({ product, picks }: { product: Product; picks: P
 
       <div className="mt-5 flex flex-wrap items-center gap-4">
         <div className="text-sm">
-          <span className="text-muted-foreground line-through">{taka(subtotal)}</span>{" "}
+          {saving > 0 && <span className="text-muted-foreground line-through">{taka(subtotal)}</span>}{" "}
           <span className="text-base font-semibold">{taka(subtotal - saving)}</span>
-          <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
-            save {taka(saving)}
-          </span>
+          {saving > 0 && (
+            <span className="ml-2 rounded-full bg-primary/15 px-2 py-0.5 text-xs text-primary">
+              save {taka(saving)}
+            </span>
+          )}
         </div>
         <button
           onClick={() => {
             set.forEach((p) => add(p, 1));
-            toast.success(`Look added — ${bundle.percent}% off applied in your bag`);
+            toast.success(saving > 0 ? `Look added — ${bundle.percent}% off applied in your bag` : "Look added to your bag");
           }}
           className="rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-90"
         >
