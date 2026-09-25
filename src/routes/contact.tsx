@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useText } from "@/lib/content";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -20,38 +21,35 @@ export const Route = createFileRoute("/contact")({
 });
 
 function Contact() {
+  const t = useText();
   return (
     <div className="mx-auto max-w-3xl px-5 py-16">
-      <p className="eyebrow">Contact & delivery</p>
-      <h1 className="mt-2 text-4xl">We're a message away</h1>
+      <p className="eyebrow">{t("contact.eyebrow")}</p>
+      <h1 className="mt-2 text-4xl">{t("contact.title")}</h1>
       <div className="gold-rule my-6" />
 
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl">Delivery charges</h2>
+          <h2 className="font-display text-xl">{t("contact.delivery.title")}</h2>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Inside Dhaka — ৳60</li>
-            <li>Outside Dhaka — ৳120</li>
-            <li>Delivered within 2–4 working days</li>
+            <li>{t("contact.delivery.l1")}</li>
+            <li>{t("contact.delivery.l2")}</li>
+            <li>{t("contact.delivery.l3")}</li>
           </ul>
         </div>
         <div className="rounded-xl border border-border bg-card p-6">
-          <h2 className="font-display text-xl">Payment</h2>
+          <h2 className="font-display text-xl">{t("contact.payment.title")}</h2>
           <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
-            <li>Cash on delivery all over Bangladesh</li>
-            <li>Pay the courier when the parcel arrives</li>
-            <li>No advance payment needed</li>
+            <li>{t("contact.payment.l1")}</li>
+            <li>{t("contact.payment.l2")}</li>
+            <li>{t("contact.payment.l3")}</li>
           </ul>
         </div>
       </div>
 
       <div className="mt-6 rounded-xl border border-border bg-secondary/50 p-6">
-        <h2 className="font-display text-xl">Talk to us</h2>
-        <p className="mt-3 text-sm text-muted-foreground">
-          For order updates, exchanges or a custom request, message us on WhatsApp or Facebook and
-          we'll reply within a few hours. Add your contact details here once you're ready to share
-          them publicly.
-        </p>
+        <h2 className="font-display text-xl">{t("contact.talk.title")}</h2>
+        <p className="mt-3 text-sm text-muted-foreground">{t("contact.talk.text")}</p>
       </div>
     </div>
   );
