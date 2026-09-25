@@ -1,16 +1,30 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { SmartImage } from "@/components/site/SmartImage";
 import { useCart } from "@/lib/cart";
 import { taka, type Product } from "@/lib/shop";
 import { useBundle } from "@/lib/bundle";
+import { productsQuery } from "@/lib/queries";
 
 export function CompleteTheLook({ product, picks }: { product: Product; picks: Product[] }) {
   const { add } = useCart();
   const bundle = useBundle();
-  const pool = [product, ...picks].filter((p) => p.in_stock);
-  const set = pool.slice(0, bundle.minPieces);
-  if (!bundle.enabled || set.length < bundle.minPieces) return null;
+  const { data: all } = useQuery(productsQuery);
+  const chosenSlugs = (product.look_slugs ?? []).filter(Boolean);
+  const manual = chosenSlugs.length > 0;
+
+  let set: Product[];
+  if (manual) {
+    const bySlug = new Map((all ?? []).map((p) => [p.slug, p]));
+    const chosen = chosenSlugs.map((s) => bySlug.get(s)).filter((p): p is Product => !!p && p.in_stock);
+    set = product.in_stock ? [product, ...chosen] : chosen;
+    if (!bundle.enabled || set.length < 2) return null;
+  } else {
+    const pool = [product, ...picks].filter((p) => p.in_stock);
+    set = pool.slice(0, bundle.minPieces);
+    if (!bundle.enabled || set.length < bundle.minPieces) return null;
+  }
 
   const subtotal = set.reduce((s, p) => s + p.price, 0);
   const saving = bundle.discount(set.length, subtotal);
@@ -19,10 +33,10 @@ export function CompleteTheLook({ product, picks }: { product: Product; picks: P
     <section className="mt-16 rounded-2xl border border-primary/40 bg-primary/5 p-6">
       <p className="eyebrow">Complete the look</p>
       <h2 className="mt-1 font-display text-2xl">
-        Style all {bundle.minPieces} and save {bundle.percent}%
+        {saving > 0 ? `Style all ${set.length} and save ${bundle.percent}%` : `Style all ${set.length} together`}
       </h2>
       <p className="mt-1 text-sm text-muted-foreground">
-        Chosen from what customers most often buy together with this piece.
+        {manual ? "Hand-picked to go with this piece." : "Chosen from what customers most often buy together with this piece."}
       </p>
 
       <div className="mt-5 flex flex-wrap items-center gap-3">
