@@ -36,7 +36,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const t = useText();
   const initial = Route.useLoaderData();
-  const { data: products } = useQuery({ ...productsQuery, initialData: initial ?? undefined });
+  const { data: products } = useQuery({ ...productsQuery, ...(initial ? { initialData: initial } : {}) });
   const featured = (products ?? []).filter((p) => p.featured);
 
 
