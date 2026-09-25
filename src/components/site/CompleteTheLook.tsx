@@ -7,6 +7,22 @@ import { taka, type Product } from "@/lib/shop";
 import { useBundle } from "@/lib/bundle";
 import { productsQuery } from "@/lib/queries";
 
+// Seeded shuffle so the "random" picks are stable per product (no hydration mismatch).
+function seededShuffle<T>(items: T[], seed: string): T[] {
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    h = Math.imul(h ^ (h >>> 15), 2246822519);
+    const j = Math.abs(h) % (i + 1);
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
 export function CompleteTheLook({ product, picks }: { product: Product; picks: Product[] }) {
   const { add } = useCart();
   const bundle = useBundle();
@@ -18,7 +34,12 @@ export function CompleteTheLook({ product, picks }: { product: Product; picks: P
   if (manual) {
     const bySlug = new Map((all ?? []).map((p) => [p.slug, p]));
     const chosen = chosenSlugs.map((s) => bySlug.get(s)).filter((p): p is Product => !!p && p.in_stock);
-    set = product.in_stock ? [product, ...chosen] : chosen;
+    // Show the product itself plus a random selection from the hand-picked pieces.
+    const othersNeeded = Math.max(bundle.minPieces - 1, 1);
+    const randomPicks = chosen.length > othersNeeded
+      ? seededShuffle(chosen, product.slug).slice(0, othersNeeded)
+      : chosen;
+    set = product.in_stock ? [product, ...randomPicks] : randomPicks;
     if (!bundle.enabled || set.length < 2) return null;
   } else {
     const pool = [product, ...picks].filter((p) => p.in_stock);
