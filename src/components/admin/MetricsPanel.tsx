@@ -3,6 +3,24 @@ import { taka } from "@/lib/shop";
 import type { Order } from "@/lib/orders";
 import { ORDER_STATUSES } from "@/lib/orders";
 
+// Messenger orders are typed as free text, e.g. "Bangle*2  Bamboo Bangle*1" or "A, B".
+// Read "*2" / "x2" quantities and count separate pieces; website items use qty directly.
+function itemPieces(it: { name: string; qty: number; slug?: string }): number {
+  if (it.slug !== "messenger") return it.qty;
+  const name = (it.name ?? "").trim();
+  if (!name || /^messenger order$/i.test(name)) return it.qty;
+  const marks = [...name.matchAll(/(?:\*|×|\bx)\s*(\d+)/gi)];
+  if (marks.length) {
+    const rest = name.replace(/(?:\*|×|\bx)\s*(\d+)/gi, "|");
+    const parts = rest.split(/[|,+\n]|\s{2,}|\band\b/i).filter((p) => p.trim()).length;
+    const extra = Math.max(0, parts - marks.length); // names without a *n count as 1
+    return (marks.reduce((s, m) => s + Number(m[1]), 0) + extra) * it.qty;
+  }
+  const parts = name.split(/[,+\n]|\s{2,}|\band\b/i).filter((p) => p.trim()).length;
+  return Math.max(1, parts) * it.qty;
+}
+const orderPieces = (o: Order) => (o.items ?? []).reduce((t, it) => t + itemPieces(it), 0);
+
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -43,12 +61,11 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
     const inside = orders.filter((o) => o.area === "inside_dhaka").length;
     const messenger = orders.filter((o) => o.source === "messenger").length;
 
-    const piecesSold = paid.reduce((s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0), 0);
-    const piecesDelivered = delivered.reduce(
-      (s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0),
-      0,
-    );
-    const piecesToday = today.reduce((s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0), 0);
+    const piecesSold = paid.reduce((s, o) => s + orderPieces(o), 0);
+    const piecesDelivered = delivered.reduce((s, o) => s + orderPieces(o), 0);
+    const piecesToday = today
+      .filter((o) => o.status !== "cancelled")
+      .reduce((s, o) => s + orderPieces(o), 0);
 
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
