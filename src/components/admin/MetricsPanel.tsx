@@ -43,6 +43,13 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
     const inside = orders.filter((o) => o.area === "inside_dhaka").length;
     const messenger = orders.filter((o) => o.source === "messenger").length;
 
+    const piecesSold = paid.reduce((s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0), 0);
+    const piecesDelivered = delivered.reduce(
+      (s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0),
+      0,
+    );
+    const piecesToday = today.reduce((s, o) => s + (o.items ?? []).reduce((t, it) => t + it.qty, 0), 0);
+
     const last7 = Array.from({ length: 7 }, (_, i) => {
       const d = new Date();
       d.setDate(d.getDate() - (6 - i));
@@ -69,6 +76,9 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
       website: orders.length - messenger,
       last7,
       cancelRate: orders.length ? Math.round((counts['cancelled']! / orders.length) * 100) : 0,
+      piecesSold,
+      piecesDelivered,
+      piecesToday,
     };
   }, [orders]);
 
