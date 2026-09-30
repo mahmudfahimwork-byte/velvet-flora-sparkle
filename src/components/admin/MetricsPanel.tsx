@@ -86,21 +86,18 @@ export function MetricsPanel({ orders, productCount }: { orders: Order[]; produc
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <Stat label="Total orders" value={String(orders.length)} hint={`${m.week} in the last 7 days`} />
         <Stat label="Revenue (excl. cancelled)" value={taka(m.revenue)} hint={`${taka(m.deliveredRevenue)} delivered`} />
         <Stat label="Average order" value={taka(m.aov)} hint={`${productCount} products live`} />
         <Stat label="Today" value={`${m.today}`} hint={taka(m.todayRevenue)} />
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Stat
           label="Pieces sold (excl. cancelled)"
           value={String(m.piecesSold)}
           hint={`${m.piecesDelivered} delivered${m.piecesToday ? ` · ${m.piecesToday} today` : ""}`}
         />
-        <div className="sm:col-span-1 lg:col-span-3 hidden sm:block" />
       </div>
+
 
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
