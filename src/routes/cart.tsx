@@ -12,6 +12,8 @@ import { useQuery } from "@tanstack/react-query";
 import { productsQuery } from "@/lib/queries";
 import { CartUpsell } from "@/components/site/CartUpsell";
 import { UnlockPicks } from "@/components/site/UnlockPicks";
+import { WhatsAppIcon, whatsappCartUrl } from "@/components/site/QuickOrder";
+import { pixelTrack } from "@/lib/pixel";
 
 
 
@@ -306,6 +308,22 @@ function CartPage() {
           >
             {submitting ? "Placing order…" : `Confirm order · ${taka(total)}`}
           </button>
+          <a
+            href={whatsappCartUrl({
+              lines: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
+              discount,
+              areaLabel: DELIVERY[area].label,
+              deliveryFee,
+              total,
+            })}
+            target="_blank"
+            rel="noreferrer"
+            onClick={() => pixelTrack("Contact", { value: total, currency: "BDT", num_items: lines.length })}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary"
+          >
+            <WhatsAppIcon />
+            Order via WhatsApp
+          </a>
         </form>
       </div>
     </div>

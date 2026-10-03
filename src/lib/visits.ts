@@ -27,19 +27,22 @@ export function logPageView() {
     const campaign =
       params.get("utm_campaign") ?? params.get("utm_source") ?? (params.get("fbclid") ? "facebook_ads" : "");
 
-    void recordVisit({
-      data: {
-        visitorId,
-        sessionId,
-        path: window.location.pathname,
-        pageTitle: document.title.slice(0, 200),
-        referrer: document.referrer || "",
-        campaign,
-        isNewVisitor,
-      },
-    }).catch(() => {
-      /* analytics must never break the page */
-    });
+    const payload = {
+      visitorId,
+      sessionId,
+      path: window.location.pathname,
+      pageTitle: document.title.slice(0, 200),
+      referrer: document.referrer || "",
+      campaign,
+      isNewVisitor,
+    };
+    const send = () =>
+      void recordVisit({ data: payload }).catch(() => {
+        /* analytics must never break the page */
+      });
+    const idle = (window as Window & { requestIdleCallback?: (cb: () => void) => void }).requestIdleCallback;
+    if (idle) idle(send);
+    else setTimeout(send, 1500);
   } catch {
     /* storage unavailable */
   }
