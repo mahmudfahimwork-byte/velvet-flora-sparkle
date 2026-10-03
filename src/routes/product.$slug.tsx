@@ -12,7 +12,7 @@ import { productsQuery } from "@/lib/queries";
 import { CompleteTheLook } from "@/components/site/CompleteTheLook";
 import { useRecommendations } from "@/lib/recommend";
 import { ProductReviews } from "@/components/site/ProductReviews";
-import { StickyQuickBuy, WhatsAppOrderButton } from "@/components/site/QuickOrder";
+import { WhatsAppOrderButton } from "@/components/site/QuickOrder";
 
 
 export const Route = createFileRoute("/product/$slug")({
@@ -174,22 +174,6 @@ function ProductPage() {
           {product.in_stock && (
             <div id="buy-actions">
               <WhatsAppOrderButton product={product} qty={qty} />
-              <StickyQuickBuy
-                product={product}
-                qty={qty}
-                anchorId="buy-actions"
-                onQuickCod={() => {
-                  add(product, qty);
-                  track("AddToCart", {
-                    content_name: product.name,
-                    content_ids: [product.slug],
-                    content_type: "product",
-                    value: product.price * qty,
-                    currency: "BDT",
-                  });
-                  navigate({ to: "/cart" });
-                }}
-              />
             </div>
           )}
 
