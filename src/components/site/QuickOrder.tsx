@@ -62,7 +62,7 @@ export function StickyQuickBuy({
     const el = document.getElementById(anchorId);
     if (!el) return;
     const io = new IntersectionObserver(
-      ([e]) => setShow(!e.isIntersecting && e.boundingClientRect.top < 0),
+      ([e]) => e && setShow(!e.isIntersecting && e.boundingClientRect.top < 0),
       { threshold: 0 },
     );
     io.observe(el);
