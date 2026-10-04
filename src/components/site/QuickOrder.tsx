@@ -50,7 +50,9 @@ export function whatsappCartUrl(opts: {
   areaLabel: string;
   deliveryFee: number;
   total: number;
+  customer?: { name?: string; phone?: string; address?: string; notes?: string };
 }) {
+  const c = opts.customer ?? {};
   const text = [
     "Hello Velvet Flora! ✨",
     "I want to order:",
@@ -60,9 +62,10 @@ export function whatsappCartUrl(opts: {
     `Total: ${taka(opts.total)}`,
     "",
     "My details:",
-    "Name: ",
-    "Phone: ",
-    "Delivery Address: ",
+    `Name: ${(c.name ?? "").slice(0, 80)}`,
+    `Phone: ${(c.phone ?? "").slice(0, 20)}`,
+    `Delivery Address: ${(c.address ?? "").slice(0, 400)}`,
+    ...(c.notes ? [`Note: ${c.notes.slice(0, 300)}`] : []),
   ].join("\n");
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
 }

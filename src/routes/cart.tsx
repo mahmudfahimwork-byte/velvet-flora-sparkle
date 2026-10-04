@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { track } from "@/lib/track";
 
 import { toast } from "sonner";
@@ -53,6 +53,9 @@ function CartPage() {
   const [form, setForm] = useState({ customer_name: "", phone: "", address: "", notes: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [trap, setTrap] = useState("");
+  const submitLock = useRef(false);
 
   const bundle = useBundle();
   const { data: catalog } = useQuery(productsQuery);
@@ -90,29 +93,45 @@ function CartPage() {
       return;
     }
     setErrors({});
+
+    // Bot filled the hidden trap — pretend success, save nothing.
+    if (trap) {
+      navigate({ to: "/order-confirmed", search: { code: "VF-RECEIVED" } });
+      return;
+    }
+    if (submitting || submitLock.current) return;
+    submitLock.current = true;
     setSubmitting(true);
+    setFailed(false);
 
     const orderCode = `VF-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
-    const { error } = await supabase.from("orders").insert({
-      order_code: orderCode,
-      customer_name: parsed.data.customer_name,
-      phone: parsed.data.phone,
-      address: parsed.data.address,
-      notes: parsed.data.notes ?? "",
-      area,
-      items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
-      subtotal,
-      discount,
-      delivery_fee: deliveryFee,
-      total,
-
-    });
+    let error: unknown = null;
+    try {
+      const res = await supabase.from("orders").insert({
+        order_code: orderCode,
+        customer_name: parsed.data.customer_name,
+        phone: parsed.data.phone,
+        address: parsed.data.address,
+        notes: parsed.data.notes ?? "",
+        area,
+        items: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price, slug: l.slug })),
+        subtotal,
+        discount,
+        delivery_fee: deliveryFee,
+        total,
+      });
+      error = res.error;
+    } catch (err) {
+      error = err;
+    }
 
     setSubmitting(false);
 
     if (error) {
-      toast.error("Could not place your order. Please try again.");
+      submitLock.current = false;
+      setFailed(true);
+      toast.error("Order didn't go through — finish it on WhatsApp in one tap.");
       return;
     }
 
@@ -210,6 +229,21 @@ function CartPage() {
         </div>
 
         <form onSubmit={placeOrder} className="rounded-xl border border-border bg-card p-6">
+          {/* Invisible bot trap — humans never see or reach this field */}
+          <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
+            <label>
+              Company website
+              <input
+                type="text"
+                name="company_website"
+                tabIndex={-1}
+                autoComplete="off"
+                value={trap}
+                onChange={(e) => setTrap(e.target.value)}
+              />
+            </label>
+          </div>
+
 
           <h2 className="font-display text-2xl">Delivery details</h2>
 
@@ -301,6 +335,15 @@ function CartPage() {
             </p>
           </div>
 
+          {failed && (
+            <div role="alert" className="mt-5 rounded-xl border border-primary/40 bg-secondary p-4 text-sm">
+              <p className="font-medium">Your connection was slow, but your details are saved.</p>
+              <p className="mt-1 text-muted-foreground">
+                Tap the green button below to finish your order on WhatsApp in one tap.
+              </p>
+            </div>
+          )}
+
           <button
             type="submit"
             disabled={submitting || soldOutLines.length > 0}
@@ -315,14 +358,24 @@ function CartPage() {
               areaLabel: DELIVERY[area].label,
               deliveryFee,
               total,
+              customer: {
+                name: form.customer_name,
+                phone: form.phone,
+                address: form.address,
+                notes: form.notes,
+              },
             })}
             target="_blank"
             rel="noreferrer"
             onClick={() => pixelTrack("Contact", { value: total, currency: "BDT", num_items: lines.length })}
-            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-3 text-sm font-medium transition-colors hover:bg-secondary"
+            className={`mt-3 flex w-full items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium transition-colors ${
+              failed
+                ? "bg-[#25D366] text-white hover:opacity-90"
+                : "border border-border hover:bg-secondary"
+            }`}
           >
             <WhatsAppIcon />
-            Order via WhatsApp
+            {failed ? "Complete order via WhatsApp" : "Order via WhatsApp"}
           </a>
         </form>
       </div>
