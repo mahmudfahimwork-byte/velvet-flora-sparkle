@@ -77,9 +77,12 @@ function CartPage() {
     (catalog ?? []).filter((p) => !p.in_stock).map((p) => p.slug),
   );
   const soldOutLines = lines.filter((l) => soldOutSlugs.has(l.slug));
-  const discount = bundle.discount(lines.length, subtotal);
-  const deliveryFee = lines.length ? DELIVERY[area].fee : 0;
+  const freeDelivery = lines.length > 0 && subtotal >= FREE_DELIVERY_MIN;
+  // Free delivery and the bundle discount never stack — free delivery wins.
+  const discount = freeDelivery ? 0 : bundle.discount(lines.length, subtotal);
+  const deliveryFee = !lines.length || freeDelivery ? 0 : DELIVERY[area].fee;
   const total = subtotal - discount + deliveryFee;
+  const awayFromFree = Math.max(0, FREE_DELIVERY_MIN - subtotal);
 
   const hasLines = lines.length > 0;
   useEffect(() => {
