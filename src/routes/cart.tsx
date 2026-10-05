@@ -36,12 +36,26 @@ export const Route = createFileRoute("/cart")({
   component: CartPage,
 });
 
+/** Accepts Bangla or English digits, spaces, dashes, +880 / 880 prefixes → 01XXXXXXXXX */
+function normalizeBdPhone(raw: string): string {
+  const en = raw.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
+  let digits = en.replace(/\D/g, "");
+  if (digits.startsWith("880")) digits = digits.slice(2);
+  else if (digits.startsWith("88") && digits.length === 13) digits = digits.slice(2);
+  else if (digits.length === 10 && digits.startsWith("1")) digits = "0" + digits;
+  return digits;
+}
+
 const checkoutSchema = z.object({
   customer_name: z.string().trim().min(2, "Please enter your full name").max(80),
   phone: z
     .string()
-    .trim()
-    .regex(/^01[3-9]\d{8}$/, "Enter a valid 11-digit Bangladeshi number (e.g. 01712345678)"),
+    .transform(normalizeBdPhone)
+    .pipe(
+      z
+        .string()
+        .regex(/^01[3-9]\d{8}$/, "সঠিক মোবাইল নম্বর দিন — Enter a valid number (e.g. 01712345678 / ০১৭১২৩৪৫৬৭৮)"),
+    ),
   address: z.string().trim().min(10, "Please write your full delivery address").max(400),
   notes: z.string().trim().max(300).optional(),
 });
@@ -153,7 +167,7 @@ function CartPage() {
     );
 
     clear();
-    navigate({ to: "/order-confirmed", search: { code: orderCode } });
+    navigate({ to: "/order-confirmed", search: { code: orderCode, total } });
 
   }
 
@@ -260,15 +274,19 @@ function CartPage() {
               value={form.phone}
               onChange={(v) => setForm({ ...form, phone: v })}
               error={errors['phone']}
-              placeholder="01XXXXXXXXX"
+              placeholder="01XXXXXXXXX বা ০১XXXXXXXXX"
+              inputMode="tel"
             />
+            {!errors['phone'] && /^01[3-9]\d{8}$/.test(normalizeBdPhone(form.phone)) && (
+              <p className="-mt-2 text-xs text-primary">✓ {normalizeBdPhone(form.phone)}</p>
+            )}
             <div>
               <label className="text-sm">Full address</label>
               <textarea
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={3}
-                placeholder="House, road, area, city"
+                placeholder="House/road, area, thana, district (landmark if any)"
                 className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
               />
               {errors['address'] && (
@@ -326,14 +344,22 @@ function CartPage() {
 
             <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
 
-            <div className="flex justify-between pt-2 text-base font-semibold">
-              <span>Total</span>
-              <span>{taka(total)}</span>
+            <div className="mt-2 rounded-lg bg-secondary px-4 py-3">
+              <div className="flex items-center justify-between text-base font-semibold">
+                <span>You pay on delivery</span>
+                <span className="text-lg">{taka(total)}</span>
+              </div>
+              {discount > 0 && (
+                <p className="mt-1 text-xs text-primary">You save {taka(discount)} on this order</p>
+              )}
             </div>
-            <p className="pt-2 text-xs text-muted-foreground">
-              Cash on delivery — pay the courier when your parcel arrives.
-            </p>
           </div>
+
+          <ul className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px] leading-tight text-muted-foreground">
+            <li className="rounded-lg border border-border px-2 py-2">💵<br />Cash on Delivery</li>
+            <li className="rounded-lg border border-border px-2 py-2">📞<br />We call before dispatch</li>
+            <li className="rounded-lg border border-border px-2 py-2">🔁<br />Easy exchange</li>
+          </ul>
 
           {failed && (
             <div role="alert" className="mt-5 rounded-xl border border-primary/40 bg-secondary p-4 text-sm">
@@ -351,6 +377,9 @@ function CartPage() {
           >
             {submitting ? "Placing order…" : `Confirm order · ${taka(total)}`}
           </button>
+          <p className="mt-2 text-center text-xs text-muted-foreground">
+            No advance payment needed. We'll call to confirm before dispatch.
+          </p>
           <a
             href={whatsappCartUrl({
               lines: lines.map((l) => ({ name: l.name, qty: l.qty, price: l.price })),
@@ -375,7 +404,7 @@ function CartPage() {
             }`}
           >
             <WhatsAppIcon />
-            {failed ? "Complete order via WhatsApp" : "Order via WhatsApp"}
+            {failed ? "Complete order via WhatsApp" : "Need help? Order via WhatsApp"}
           </a>
         </form>
       </div>
@@ -398,12 +427,14 @@ function Field({
   onChange,
   error,
   placeholder,
+  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   error?: string | undefined;
   placeholder?: string;
+  inputMode?: "tel" | "text";
 }) {
   return (
     <div>
@@ -411,6 +442,7 @@ function Field({
       <input
         value={value}
         placeholder={placeholder}
+        inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
       />
