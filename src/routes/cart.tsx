@@ -108,6 +108,15 @@ function CartPage() {
         next[String(issue.path[0])] = issue.message;
       }
       setErrors(next);
+      const first = ["customer_name", "phone", "address"].find((k) => next[k]);
+      if (first) {
+        toast.error(next[first]);
+        const el = document.getElementById(`field-${first}`);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => el.focus({ preventScroll: true }), 350);
+        }
+      }
       return;
     }
     setErrors({});
@@ -269,7 +278,7 @@ function CartPage() {
           <CartUpsell />
         </div>
 
-        <form onSubmit={placeOrder} className="rounded-xl border border-border bg-card p-6">
+        <form id="checkout-form" noValidate onSubmit={placeOrder} className="rounded-xl border border-border bg-card p-6">
           {/* Invisible bot trap — humans never see or reach this field */}
           <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
             <label>
@@ -290,6 +299,7 @@ function CartPage() {
 
           <div className="mt-5 space-y-4">
             <Field
+              id="field-customer_name"
               label="Full name"
               value={form.customer_name}
               onChange={(v) => setForm({ ...form, customer_name: v })}
@@ -297,6 +307,7 @@ function CartPage() {
               placeholder="Your name"
             />
             <Field
+              id="field-phone"
               label="Phone number"
               value={form.phone}
               onChange={(v) => setForm({ ...form, phone: v })}
@@ -310,11 +321,13 @@ function CartPage() {
             <div>
               <label className="text-sm">Full address</label>
               <textarea
+                id="field-address"
+                aria-invalid={!!errors['address']}
                 value={form.address}
                 onChange={(e) => setForm({ ...form, address: e.target.value })}
                 rows={3}
                 placeholder="House/road, area, thana, district (landmark if any)"
-                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-destructive/40"
               />
               {errors['address'] && (
                 <p className="mt-1 text-xs text-destructive">{errors['address']}</p>
@@ -482,6 +495,7 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 function Field({
+  id,
   label,
   value,
   onChange,
@@ -489,6 +503,7 @@ function Field({
   placeholder,
   inputMode,
 }: {
+  id?: string;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -500,11 +515,13 @@ function Field({
     <div>
       <label className="text-sm">{label}</label>
       <input
+        id={id}
+        aria-invalid={!!error}
         value={value}
         placeholder={placeholder}
         inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+        className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-2 aria-[invalid=true]:ring-destructive/40"
       />
       {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
     </div>
