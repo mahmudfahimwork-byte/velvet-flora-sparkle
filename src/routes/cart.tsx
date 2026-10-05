@@ -37,7 +37,7 @@ export const Route = createFileRoute("/cart")({
 });
 
 /** Accepts Bangla or English digits, spaces, dashes, +880 / 880 prefixes → 01XXXXXXXXX */
-export function normalizeBdPhone(raw: string): string {
+function normalizeBdPhone(raw: string): string {
   const en = raw.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
   let digits = en.replace(/\D/g, "");
   if (digits.startsWith("880")) digits = digits.slice(2);
@@ -404,7 +404,7 @@ function CartPage() {
             }`}
           >
             <WhatsAppIcon />
-            {failed ? "Complete order via WhatsApp" : "Order via WhatsApp"}
+            {failed ? "Complete order via WhatsApp" : "Need help? Order via WhatsApp"}
           </a>
         </form>
       </div>
@@ -427,12 +427,14 @@ function Field({
   onChange,
   error,
   placeholder,
+  inputMode,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   error?: string | undefined;
   placeholder?: string;
+  inputMode?: "tel" | "text";
 }) {
   return (
     <div>
@@ -440,6 +442,7 @@ function Field({
       <input
         value={value}
         placeholder={placeholder}
+        inputMode={inputMode}
         onChange={(e) => onChange(e.target.value)}
         className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
       />
