@@ -191,11 +191,34 @@ function CartPage() {
     );
   }
 
+  const progress = Math.min(100, Math.round((subtotal / FREE_DELIVERY_MIN) * 100));
+
   return (
-    <div className="mx-auto max-w-6xl px-5 py-14">
+    <div className="mx-auto max-w-6xl px-5 pb-32 pt-14 lg:pb-14">
       <p className="eyebrow">Checkout</p>
       <h1 className="mt-2 text-4xl">Your bag</h1>
       <div className="gold-rule my-6" />
+
+      {/* Animated free-delivery progress */}
+      <div className="mb-8 rounded-2xl border border-border bg-card p-4">
+        <div className="flex items-center gap-2 text-sm">
+          <Truck className={`size-4 shrink-0 text-primary ${freeDelivery ? "animate-bounce" : ""}`} />
+          {freeDelivery ? (
+            <p className="font-medium text-primary">🎉 You've unlocked FREE delivery across Bangladesh!</p>
+          ) : (
+            <p className="text-muted-foreground">
+              Add <span className="font-semibold text-foreground">{taka(awayFromFree)}</span> more to get{" "}
+              <span className="font-semibold text-primary">FREE delivery</span>
+            </p>
+          )}
+        </div>
+        <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-secondary">
+          <div
+            className={`progress-shimmer relative h-full rounded-full transition-[width] duration-700 ease-out ${freeDelivery ? "progress-glow" : ""}`}
+            style={{ width: `${Math.max(progress, 4)}%` }}
+          />
+        </div>
+      </div>
 
       <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-4">
@@ -327,25 +350,7 @@ function CartPage() {
           </div>
 
           <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
-            {/* Free delivery progress */}
-            {freeDelivery ? (
-              <p className="rounded-lg bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
-                🎉 You've unlocked FREE delivery!
-              </p>
-            ) : (
-              <div className="rounded-lg border border-border px-3 py-2">
-                <p className="text-xs text-muted-foreground">
-                  Add <span className="font-semibold text-foreground">{taka(awayFromFree)}</span> more to get{" "}
-                  <span className="font-semibold text-primary">FREE delivery</span>
-                </p>
-                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-primary transition-all"
-                    style={{ width: `${Math.min(100, Math.round((subtotal / FREE_DELIVERY_MIN) * 100))}%` }}
-                  />
-                </div>
-              </div>
-            )}
+
 
             <Row label="Subtotal" value={taka(subtotal)} />
             {discount > 0 ? (
@@ -386,9 +391,15 @@ function CartPage() {
           </div>
 
           <ul className="mt-5 grid grid-cols-3 gap-2 text-center text-[11px] leading-tight text-muted-foreground">
-            <li className="rounded-lg border border-border px-2 py-2">💵<br />Cash on Delivery</li>
-            <li className="rounded-lg border border-border px-2 py-2">📞<br />We call before dispatch</li>
-            <li className="rounded-lg border border-border px-2 py-2">🔁<br />Easy exchange</li>
+            <li className="flex flex-col items-center gap-1 rounded-lg border border-border px-2 py-2">
+              <Banknote className="size-4 text-primary" />Cash on Delivery
+            </li>
+            <li className="flex flex-col items-center gap-1 rounded-lg border border-border px-2 py-2">
+              <PhoneCall className="size-4 text-primary" />We call before dispatch
+            </li>
+            <li className="flex flex-col items-center gap-1 rounded-lg border border-border px-2 py-2">
+              <RefreshCw className="size-4 text-primary" />Easy exchange
+            </li>
           </ul>
 
           {failed && (
@@ -437,6 +448,24 @@ function CartPage() {
             {failed ? "Complete order via WhatsApp" : "Need help? Order via WhatsApp"}
           </a>
         </form>
+      </div>
+
+      {/* Mobile sticky checkout bar — always within thumb reach */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 px-4 py-3 shadow-lift backdrop-blur lg:hidden">
+        <div className="mx-auto flex max-w-md items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] text-muted-foreground">You pay on delivery</p>
+            <p className="truncate text-lg font-semibold leading-tight">{taka(total)}</p>
+          </div>
+          <button
+            type="submit"
+            form="checkout-form"
+            disabled={submitting || soldOutLines.length > 0}
+            className="shrink-0 rounded-full bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-soft transition-opacity disabled:opacity-60"
+          >
+            {submitting ? "Placing…" : "Confirm order"}
+          </button>
+        </div>
       </div>
     </div>
   );

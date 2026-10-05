@@ -157,3 +157,27 @@
   width: 3.5rem;
   background: linear-gradient(90deg, transparent, var(--gold), transparent);
 }
+
+@keyframes progress-sweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(250%); }
+}
+@keyframes progress-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklab, var(--gold) 60%, transparent); }
+  50% { box-shadow: 0 0 12px 2px color-mix(in oklab, var(--gold) 60%, transparent); }
+}
+@utility progress-shimmer {
+  overflow: hidden;
+  background: linear-gradient(90deg, var(--primary), var(--gold));
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+    animation: progress-sweep 1.8s ease-in-out infinite;
+  }
+}
+@utility progress-glow {
+  animation: progress-pulse 1.6s ease-in-out infinite;
+}
