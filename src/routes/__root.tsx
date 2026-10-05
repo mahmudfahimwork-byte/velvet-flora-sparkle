@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -47,6 +48,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: unknown; reset: () => void }) {
   console.error(error);
   const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
@@ -171,6 +173,7 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
+        {pathname !== "/cart" && (
         <a
           href="https://facebook.com/velvetflorabd"
           target="_blank"
@@ -180,6 +183,7 @@ function RootComponent() {
         >
           <Facebook className="size-6" fill="currentColor" />
         </a>
+        )}
         <Toaster position="top-center" richColors />
       </CartProvider>
     </QueryClientProvider>
