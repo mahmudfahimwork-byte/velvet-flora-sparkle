@@ -4,6 +4,7 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
@@ -147,6 +148,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
     initMetaPixel();
@@ -171,6 +173,7 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
+        {pathname !== "/cart" && (
         <a
           href="https://facebook.com/velvetflorabd"
           target="_blank"
@@ -180,6 +183,7 @@ function RootComponent() {
         >
           <Facebook className="size-6" fill="currentColor" />
         </a>
+        )}
         <Toaster position="top-center" richColors />
       </CartProvider>
     </QueryClientProvider>
