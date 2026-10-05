@@ -26,6 +26,9 @@ export const DELIVERY = {
 
 export type AreaKey = keyof typeof DELIVERY;
 
+/** Orders at or above this subtotal get free delivery (bundle discount does not apply then). */
+export const FREE_DELIVERY_MIN = 1400;
+
 /** "Complete the look": 3 or more different pieces in one order get 10% off. */
 export const BUNDLE = { minPieces: 3, percent: 10 } as const;
 
