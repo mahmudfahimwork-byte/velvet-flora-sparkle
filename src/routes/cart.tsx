@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useCart } from "@/lib/cart";
-import { DELIVERY, taka, type AreaKey } from "@/lib/shop";
+import { DELIVERY, FREE_DELIVERY_MIN, taka, type AreaKey } from "@/lib/shop";
 import { useBundle } from "@/lib/bundle";
 import { useQuery } from "@tanstack/react-query";
 import { productsQuery } from "@/lib/queries";
@@ -327,6 +327,26 @@ function CartPage() {
           </div>
 
           <div className="mt-6 space-y-2 border-t border-border pt-4 text-sm">
+            {/* Free delivery progress */}
+            {freeDelivery ? (
+              <p className="rounded-lg bg-primary/10 px-3 py-2 text-xs font-medium text-primary">
+                🎉 You've unlocked FREE delivery!
+              </p>
+            ) : (
+              <div className="rounded-lg border border-border px-3 py-2">
+                <p className="text-xs text-muted-foreground">
+                  Add <span className="font-semibold text-foreground">{taka(awayFromFree)}</span> more to get{" "}
+                  <span className="font-semibold text-primary">FREE delivery</span>
+                </p>
+                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-secondary">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${Math.min(100, Math.round((subtotal / FREE_DELIVERY_MIN) * 100))}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
             <Row label="Subtotal" value={taka(subtotal)} />
             {discount > 0 ? (
               <div className="flex justify-between text-primary">
@@ -335,17 +355,24 @@ function CartPage() {
               </div>
             ) : (
               <>
-                {bundle.enabled && bundle.minPieces > lines.length && (
+                {!freeDelivery && bundle.enabled && bundle.minPieces > lines.length && (
                   <p className="text-xs text-muted-foreground">
                     Add {bundle.minPieces - lines.length} more piece
                     {bundle.minPieces - lines.length > 1 ? "s" : ""} to get {bundle.percent}% off your look.
                   </p>
                 )}
-                <UnlockPicks />
+                {!freeDelivery && <UnlockPicks />}
               </>
             )}
 
-            <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
+            {freeDelivery ? (
+              <div className="flex justify-between text-primary">
+                <span>Delivery ({DELIVERY[area].label})</span>
+                <span className="font-medium">FREE</span>
+              </div>
+            ) : (
+              <Row label={`Delivery (${DELIVERY[area].label})`} value={taka(deliveryFee)} />
+            )}
 
             <div className="mt-2 rounded-lg bg-secondary px-4 py-3">
               <div className="flex items-center justify-between text-base font-semibold">
