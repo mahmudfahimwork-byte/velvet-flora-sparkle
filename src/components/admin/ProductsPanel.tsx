@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, formatFileSize } from "@/lib/image-compression";
 import { CATEGORIES, categoryLabel, taka, type Product } from "@/lib/shop";
 
 const EMPTY = {
@@ -69,18 +70,17 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
   }
 
   async function uploadOne(file: File): Promise<string | null> {
-    if (!file.type.startsWith("image/")) {
-      toast.error(`${file.name}: not an image file`);
+    let result;
+    try {
+      result = await compressImage(file);
+    } catch (error) {
+      toast.error(`${file.name}: ${error instanceof Error ? error.message : "Could not compress photo"}`);
       return null;
     }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error(`${file.name}: must be under 10MB`);
-      return null;
-    }
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("product-images").upload(path, file, {
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+    const { error } = await supabase.storage.from("product-images").upload(path, result.file, {
       cacheControl: "31536000",
+      contentType: "image/webp",
       upsert: false,
     });
     if (error) {
@@ -94,6 +94,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
       toast.error(signErr?.message ?? "Could not read the uploaded image");
       return null;
     }
+    toast.success(`${file.name}: ${formatFileSize(result.originalBytes)} → ${formatFileSize(result.compressedBytes)}`);
     return data.signedUrl;
   }
 
@@ -272,7 +273,7 @@ export function ProductsPanel({ onCountChange }: { onCountChange?: (n: number) =
               }}
               className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-secondary file:px-3 file:py-1 file:text-xs"
             />
-            {uploading && <p className="mt-1 text-xs text-muted-foreground">Uploading…</p>}
+            {uploading && <p className="mt-1 text-xs text-muted-foreground">Compressing and uploading…</p>}
             {draft.images.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-3">
                 {draft.images.map((url, i) => (
