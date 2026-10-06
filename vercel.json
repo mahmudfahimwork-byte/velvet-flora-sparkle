@@ -1,5 +1,19 @@
 {
+  "rewrites": [
+    {
+      "source": "/storage-cdn/:path*",
+      "destination": "https://odctkivqjvbyeqkpwsfi.supabase.co/storage/v1/:path*"
+    }
+  ],
   "headers": [
+    {
+      "source": "/storage-cdn/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "CDN-Cache-Control", "value": "public, max-age=31536000, immutable" },
+        { "key": "Vercel-CDN-Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
     {
       "source": "/images/(.*)",
       "headers": [

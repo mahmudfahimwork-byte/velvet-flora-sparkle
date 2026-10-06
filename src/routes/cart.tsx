@@ -1,3 +1,4 @@
+import { cdnImage } from "@/components/site/SmartImage";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Banknote, PhoneCall, RefreshCw, Truck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -238,7 +239,7 @@ function CartPage() {
               className="flex gap-4 rounded-xl border border-border bg-card p-4"
             >
               <img
-                src={l.image_url}
+                src={cdnImage(l.image_url)}
                 alt={l.name}
                 loading="lazy"
                 width={900}
