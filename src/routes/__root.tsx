@@ -95,6 +95,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
       },
       { name: "author", content: "Velvet Flora" },
+      { name: "facebook-domain-verification", content: "2m5agycihp0dj3vupmyjji8kyh4nre" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
