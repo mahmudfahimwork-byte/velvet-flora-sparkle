@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - Compress admin-uploaded raster photos in the browser to bounded WebP files before storage to limit bandwidth usage.
+- Stored product photos render through cdnImage() → /storage-cdn/* (vercel.json rewrite) so Vercel's CDN caches them and storage egress stays low.

@@ -238,7 +238,7 @@ function CartPage() {
               className="flex gap-4 rounded-xl border border-border bg-card p-4"
             >
               <img
-                src={l.image_url}
+                src={cdnImage(l.image_url)}
                 alt={l.name}
                 loading="lazy"
                 width={900}
