@@ -71,9 +71,8 @@ export async function sendServerEvent(event: CapiEvent): Promise<{ ok: boolean; 
         custom_data: event.customData ?? {},
       },
     ],
-    ...(process.env["META_CAPI_TEST_EVENT_CODE"]
-      ? { test_event_code: process.env["META_CAPI_TEST_EVENT_CODE"] }
-      : {}),
+    // TODO: remove after Meta Events Manager testing is complete.
+    test_event_code: "TEST91966",
   };
 
   try {
