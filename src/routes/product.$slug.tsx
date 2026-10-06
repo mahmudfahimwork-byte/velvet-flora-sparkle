@@ -86,7 +86,7 @@ function ProductPage() {
         ← Back to shop
       </Link>
 
-      <div className="mt-6 grid gap-10 md:grid-cols-2">
+      <div className="mt-6 grid items-start gap-10 md:grid-cols-2">
         <ProductGallery product={product} />
 
         <div>
@@ -214,14 +214,14 @@ function ProductGallery({ product }: { product: Product }) {
 
   return (
     <div>
-      <div className="overflow-hidden rounded-2xl border border-border bg-secondary">
+      <div className="aspect-square overflow-hidden rounded-2xl border border-border bg-secondary">
         <SmartImage
           src={current}
           fetchPriority="high"
           alt={product.name}
           width={900}
           height={900}
-          className="size-full object-cover"
+          className="size-full object-contain"
         />
       </div>
       {gallery.length > 1 && (
