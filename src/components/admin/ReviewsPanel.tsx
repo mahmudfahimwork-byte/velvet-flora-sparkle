@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage, formatFileSize } from "@/lib/image-compression";
 import type { Product } from "@/lib/shop";
 
 export type Review = {
@@ -48,19 +49,18 @@ export function ReviewsPanel() {
   }, [load]);
 
   async function uploadPhoto(file: File) {
-    if (!file.type.startsWith("image/")) {
-      toast.error("That file is not an image");
-      return;
-    }
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error("Photo must be under 10MB");
+    let result;
+    try {
+      result = await compressImage(file);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not compress photo");
       return;
     }
     setUploading(true);
-    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
-    const path = `reviews/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("product-images").upload(path, file, {
+    const path = `reviews/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+    const { error } = await supabase.storage.from("product-images").upload(path, result.file, {
       cacheControl: "31536000",
+      contentType: "image/webp",
       upsert: false,
     });
     if (error) {
@@ -77,7 +77,7 @@ export function ReviewsPanel() {
       return;
     }
     setDraft((d) => (d ? { ...d, image_url: data.signedUrl } : d));
-    toast.success("Photo uploaded");
+    toast.success(`Photo compressed: ${formatFileSize(result.originalBytes)} → ${formatFileSize(result.compressedBytes)}`);
   }
 
   async function save() {
@@ -218,7 +218,7 @@ export function ReviewsPanel() {
                 className="mt-1 block text-sm"
               />
             </label>
-            {uploading && <span className="text-xs text-muted-foreground">Uploading…</span>}
+            {uploading && <span className="text-xs text-muted-foreground">Compressing and uploading…</span>}
             {draft.image_url && (
               <div className="flex items-center gap-2">
                 <img

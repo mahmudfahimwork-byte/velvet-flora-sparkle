@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Compress admin-uploaded raster photos in the browser to bounded WebP files before storage to limit bandwidth usage.
