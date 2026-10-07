@@ -71,8 +71,6 @@ export async function sendServerEvent(event: CapiEvent): Promise<{ ok: boolean; 
         custom_data: event.customData ?? {},
       },
     ],
-    // TODO: remove after Meta Events Manager testing is complete.
-    test_event_code: "TEST91966",
   };
 
   try {
