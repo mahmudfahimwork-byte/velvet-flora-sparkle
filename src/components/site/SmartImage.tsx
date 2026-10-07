@@ -5,8 +5,9 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
 
 // Live store photos are served through velvetflorabd.com/storage-cdn/* (see vercel.json),
 // so Vercel's CDN caches them and the storage provider is hit only once per photo.
-const STORAGE_ORIGIN = "https://odctkivqjvbyeqkpwsfi.supabase.co/storage/v1/";
+const STORAGE_ORIGIN = "https://vrnlypjhonuykzcurpvb.supabase.co/storage/v1/";
 
+// Photos still hosted on the old project are left as-is (no CDN rewrite) until re-uploaded.
 export function cdnImage(src: string): string {
   if (!src || !src.startsWith(STORAGE_ORIGIN)) return src;
   return "/storage-cdn/" + src.slice(STORAGE_ORIGIN.length);
