@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/storage-cdn/:path*",
-      "destination": "https://odctkivqjvbyeqkpwsfi.supabase.co/storage/v1/:path*"
+      "destination": "https://vrnlypjhonuykzcurpvb.supabase.co/storage/v1/:path*"
     }
   ],
   "headers": [
