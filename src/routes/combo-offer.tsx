@@ -354,7 +354,7 @@ function ComboOffer() {
           })}
         </div>
 
-        <form onSubmit={submit} noValidate className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
+        <form id="combo-form" onSubmit={submit} noValidate className="mt-6 space-y-4 rounded-3xl border border-border bg-card p-5 shadow-soft">
           <input tabIndex={-1} autoComplete="off" aria-hidden="true" className="hidden" value={trap} onChange={(e) => setTrap(e.target.value)} name="website" />
           {([
             ["customer_name", "আপনার নাম *", "যেমন: রহিম উদ্দিন", "text", "name"],
@@ -402,8 +402,8 @@ function ComboOffer() {
 
       {/* Mobile sticky CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur md:hidden">
-        <button onClick={scrollToOrder} className="w-full animate-pulse rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-lift">
-          অর্ডার করতে চাপুন — ৳{bn(selected.price)} · ফ্রি ডেলিভারি
+        <button type="submit" form="combo-form" disabled={submitting} className="w-full animate-pulse rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-lift disabled:opacity-60">
+          {submitting ? "অর্ডার পাঠানো হচ্ছে..." : `অর্ডার কনফার্ম করুন — ৳${bn(selected.price)} · ফ্রি ডেলিভারি`}
         </button>
       </div>
     </div>
