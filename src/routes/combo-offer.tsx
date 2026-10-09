@@ -9,6 +9,8 @@ import { WHATSAPP_NUMBER, WhatsAppIcon } from "@/components/site/QuickOrder";
 import heroImg from "@/assets/combo-hero.jpg";
 import grinderImg from "@/assets/combo-grinder.jpg";
 import cookerImg from "@/assets/combo-cooker.jpg";
+import { useText } from "@/lib/content";
+import { cdnImage } from "@/components/site/SmartImage";
 
 export const Route = createFileRoute("/combo-offer")({
   head: () => ({
@@ -26,12 +28,12 @@ export const Route = createFileRoute("/combo-offer")({
 
 const bn = (n: number) => n.toLocaleString("bn-BD");
 
-const PACKAGES = [
-  { id: "combo", title: "মেগা কিচেন কম্বো", sub: "গ্রাইন্ডার + মাল্টি কুকার", price: 1700, was: 2020, badge: "সবচেয়ে জনপ্রিয় · ৳৩২০ সাশ্রয়", slug: "combo-grinder-cooker", name: "Combo: Silver Crest 10000W Grinder + YN 2L Multi Cooker" },
-  { id: "grinder", title: "শুধু গ্রাইন্ডার", sub: "সিলভার ক্রেস্ট ১০০০০ ওয়াট", price: 1100, slug: "silver-crest-grinder-10000w", name: "Silver Crest 10000W Grinder" },
-  { id: "cooker", title: "শুধু মাল্টি কুকার", sub: "YN ২ লিটার", price: 920, slug: "yn-multi-cooker-2l", name: "YN 2L Multi Cooker" },
-] as const;
-type PkgId = (typeof PACKAGES)[number]["id"];
+type PkgId = "combo" | "grinder" | "cooker";
+type Pkg = { id: PkgId; title: string; sub: string; price: number; was?: number; badge?: string; slug: string; name: string };
+const num = (v: string, d: number) => {
+  const n = Number(v.replace(/[০-৯]/g, (c) => String("০১২৩৪৫৬৭৮৯".indexOf(c))).replace(/[^\d.]/g, ""));
+  return Number.isFinite(n) && n > 0 ? Math.round(n) : d;
+};
 
 function normalizeBdPhone(raw: string) {
   const en = raw.replace(/[০-৯]/g, (d) => String("০১২৩৪৫৬৭৮৯".indexOf(d)));
@@ -107,6 +109,17 @@ function scrollToOrder() {
 }
 
 function ComboOffer() {
+  const t = useText();
+  const comboPrice = num(t("combo.price.combo"), 1700);
+  const wasPrice = num(t("combo.price.was"), 2020);
+  const save = Math.max(0, wasPrice - comboPrice);
+  const PACKAGES: Pkg[] = [
+    { id: "combo", title: t("combo.combo.title"), sub: "গ্রাইন্ডার + মাল্টি কুকার", price: comboPrice, was: wasPrice, badge: save ? `সবচেয়ে জনপ্রিয় · ৳${bn(save)} সাশ্রয়` : "সবচেয়ে জনপ্রিয়", slug: "combo-grinder-cooker", name: "Combo: Silver Crest 10000W Grinder + YN 2L Multi Cooker" },
+    { id: "grinder", title: "শুধু গ্রাইন্ডার", sub: t("combo.grinder.title"), price: num(t("combo.price.grinder"), 1100), slug: "silver-crest-grinder-10000w", name: "Silver Crest 10000W Grinder" },
+    { id: "cooker", title: "শুধু মাল্টি কুকার", sub: t("combo.cooker.title"), price: num(t("combo.price.cooker"), 920), slug: "yn-multi-cooker-2l", name: "YN 2L Multi Cooker" },
+  ];
+  const img = (k: "combo.img.hero" | "combo.img.grinder" | "combo.img.cooker", fb: string) => { const v = t(k); return v ? cdnImage(v) : fb; };
+  const lines = (k: "combo.grinder.features" | "combo.cooker.features") => t(k).split("\n").map((x) => x.trim()).filter(Boolean);
   const [pkg, setPkg] = useState<PkgId>("combo");
   const selected = PACKAGES.find((p) => p.id === pkg)!;
   const total = useCountUp(selected.price);
@@ -121,7 +134,7 @@ function ComboOffer() {
   const startedCheckout = useRef(false);
 
   useEffect(() => {
-    track("ViewContent", { currency: "BDT", value: 1700, content_type: "product", content_ids: ["combo-grinder-cooker"] });
+    track("ViewContent", { currency: "BDT", value: comboPrice, content_type: "product", content_ids: ["combo-grinder-cooker"] });
   }, []);
 
   function onField(k: keyof typeof form, v: string) {
@@ -204,7 +217,7 @@ function ComboOffer() {
           <h1 className="mt-6 text-3xl font-bold text-foreground">ধন্যবাদ! আপনার অর্ডার সম্পন্ন হয়েছে</h1>
           <p className="mt-3 text-muted-foreground">অর্ডার নম্বর: <b className="text-foreground">{done}</b></p>
           <p className="mt-1 text-muted-foreground">মোট: <b className="text-foreground">৳{bn(selected.price)}</b> · ডেলিভারি চার্জ ফ্রি</p>
-          <p className="mt-4 text-sm text-muted-foreground">আমাদের প্রতিনিধি খুব শীঘ্রই আপনাকে কল করে অর্ডার কনফার্ম করবেন। ফোনটি কাছে রাখুন।</p>
+          <p className="mt-4 text-sm text-muted-foreground">{t("combo.thanks")}</p>
         </div>
       </div>
     );
@@ -224,27 +237,27 @@ function ComboOffer() {
       <section className="mx-auto max-w-5xl px-4 pt-6 md:grid md:grid-cols-2 md:items-center md:gap-10 md:pt-12">
         <div className="text-center md:text-left">
           <span className="inline-flex items-center gap-1 rounded-full bg-accent px-3 py-1 text-xs font-bold text-accent-foreground">
-            <Flame className="size-3.5" /> সীমিত স্টক · স্পেশাল কম্বো
+            <Flame className="size-3.5" /> {t("combo.badge")}
           </span>
           <h1 className="mt-4 text-3xl font-extrabold leading-tight md:text-5xl">
-            রান্নাঘরের সব ঝামেলা শেষ <span className="text-primary">এক কম্বোতেই!</span>
+            {t("combo.title1")} <span className="text-primary">{t("combo.title2")}</span>
           </h1>
           <p className="mt-3 text-base text-muted-foreground md:text-lg">
-            সিলভার ক্রেস্ট ১০০০০ ওয়াট ৮ ব্লেড গ্রাইন্ডার + YN ২ লিটার মাল্টি কুকার — মশলা গুঁড়া থেকে রান্না, সব এক সাথে।
+            {t("combo.intro")}
           </p>
           <div className="mt-5 flex items-end justify-center gap-3 md:justify-start">
-            <span className="text-4xl font-extrabold text-primary md:text-5xl">৳{bn(1700)}</span>
-            <span className="pb-1 text-lg text-muted-foreground line-through">৳{bn(2020)}</span>
+            <span className="text-4xl font-extrabold text-primary md:text-5xl">৳{bn(comboPrice)}</span>
+            <span className="pb-1 text-lg text-muted-foreground line-through">৳{bn(wasPrice)}</span>
           </div>
-          <p className="mt-1 text-sm font-semibold text-primary">সারাদেশে ডেলিভারি চার্জ একদম ফ্রি!</p>
+          <p className="mt-1 text-sm font-semibold text-primary">{t("combo.delivery")}</p>
           <button onClick={scrollToOrder} className="mt-6 hidden w-full animate-pulse rounded-full bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lift transition-transform hover:scale-[1.02] md:inline-block md:w-auto">
-            এখনই অর্ডার করুন →
+            {t("combo.cta")}
           </button>
         </div>
         <div className="relative mt-6 md:mt-0">
-          <img src={heroImg} alt="সিলভার ক্রেস্ট গ্রাইন্ডার ও YN মাল্টি কুকার কম্বো" width={1280} height={960} className="w-full rounded-3xl shadow-lift" />
+          <img src={img("combo.img.hero", heroImg)} alt="সিলভার ক্রেস্ট গ্রাইন্ডার ও YN মাল্টি কুকার কম্বো" width={1280} height={960} className="w-full rounded-3xl shadow-lift" />
           <div className="absolute -right-2 -top-3 rotate-6 rounded-2xl bg-accent px-3 py-2 text-center text-sm font-extrabold text-accent-foreground shadow-soft">
-            ৳৩২০<br />সাশ্রয়
+            ৳{bn(save)}<br />সাশ্রয়
           </div>
         </div>
       </section>
@@ -254,12 +267,12 @@ function ComboOffer() {
         {[
           { i: Truck, t: "ফ্রি হোম ডেলিভারি", d: "সারা বাংলাদেশে" },
           { i: PackageOpen, t: "দেখে টাকা দিন", d: "ক্যাশ অন ডেলিভারি" },
-          { i: RefreshCw, t: "রিপ্লেসমেন্ট সুবিধা", d: "সমস্যা থাকলে পরিবর্তন" },
+          { i: RefreshCw, t: t("combo.trust3.title"), d: t("combo.trust3.text") },
           { i: Phone, t: "কল করে কনফার্ম", d: "অর্ডারের পর" },
-        ].map(({ i: Icon, t, d }) => (
-          <div key={t} className="rounded-2xl border border-border bg-card p-4 text-center">
+        ].map(({ i: Icon, t: title, d }) => (
+          <div key={title} className="rounded-2xl border border-border bg-card p-4 text-center">
             <Icon className="mx-auto size-7 text-primary" />
-            <p className="mt-2 text-sm font-bold">{t}</p>
+            <p className="mt-2 text-sm font-bold">{title}</p>
             <p className="text-xs text-muted-foreground">{d}</p>
           </div>
         ))}
@@ -268,13 +281,13 @@ function ComboOffer() {
       {/* Grinder */}
       <Reveal className="mx-auto mt-14 max-w-5xl px-4">
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={grinderImg} alt="সিলভার ক্রেস্ট ১০০০০ ওয়াট গ্রাইন্ডার" width={1024} height={1024} loading="lazy" className="w-full rounded-3xl shadow-soft" />
+          <img src={img("combo.img.grinder", grinderImg)} alt="সিলভার ক্রেস্ট ১০০০০ ওয়াট গ্রাইন্ডার" width={1024} height={1024} loading="lazy" className="w-full rounded-3xl shadow-soft" />
           <div>
             <p className="text-sm font-bold text-primary">পণ্য ১</p>
-            <h2 className="mt-1 text-2xl font-extrabold md:text-3xl">সিলভার ক্রেস্ট ১০০০০ ওয়াট গ্রাইন্ডার</h2>
-            <p className="mt-2 text-muted-foreground">শক্তিশালী মোটর আর ৮টি ধারালো স্টিল ব্লেড — শক্ত মশলাও মুহূর্তে মিহি।</p>
+            <h2 className="mt-1 text-2xl font-extrabold md:text-3xl">{t("combo.grinder.title")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("combo.grinder.text")}</p>
             <ul className="mt-4 space-y-2.5">
-              {["৮টি ধারালো স্টেইনলেস স্টিল ব্লেড", "১০০০০ ওয়াট হেভি ডিউটি পাওয়ার", "শুকনো মরিচ, হলুদ, ধনিয়া, জিরা গুঁড়া", "চালের গুঁড়া, কফি বিন্স, বাদাম", "স্বচ্ছ ঢাকনা — গুঁড়া হওয়া চোখে দেখুন"].map((f) => (
+              {lines("combo.grinder.features").map((f) => (
                 <li key={f} className="flex items-start gap-2"><Zap className="mt-0.5 size-5 shrink-0 text-primary" /> {f}</li>
               ))}
             </ul>
@@ -285,13 +298,13 @@ function ComboOffer() {
       {/* Cooker */}
       <Reveal className="mx-auto mt-14 max-w-5xl px-4">
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={cookerImg} alt="YN ২ লিটার মাল্টি কুকার" width={1024} height={1024} loading="lazy" className="w-full rounded-3xl shadow-soft md:order-2" />
+          <img src={img("combo.img.cooker", cookerImg)} alt="YN ২ লিটার মাল্টি কুকার" width={1024} height={1024} loading="lazy" className="w-full rounded-3xl shadow-soft md:order-2" />
           <div>
             <p className="text-sm font-bold text-primary">পণ্য ২</p>
-            <h2 className="mt-1 text-2xl font-extrabold md:text-3xl">YN ২ লিটার মাল্টি কুকার</h2>
-            <p className="mt-2 text-muted-foreground">ব্যাচেলর, মেস, অফিস বা ছোট পরিবার — চুলা ছাড়াই ঝটপট রান্না।</p>
+            <h2 className="mt-1 text-2xl font-extrabold md:text-3xl">{t("combo.cooker.title")}</h2>
+            <p className="mt-2 text-muted-foreground">{t("combo.cooker.text")}</p>
             <ul className="mt-4 space-y-2.5">
-              {["২ লিটার ধারণক্ষমতা — ১-৩ জনের জন্য", "নুডলস, ডিম সেদ্ধ, স্যুপ, খিচুড়ি, হটপট", "নন-স্টিক পাত্র — সহজে পরিষ্কার", "দ্রুত গরম হয়, বিদ্যুৎ সাশ্রয়ী", "হালকা ও বহনযোগ্য"].map((f) => (
+              {lines("combo.cooker.features").map((f) => (
                 <li key={f} className="flex items-start gap-2"><Check className="mt-0.5 size-5 shrink-0 text-primary" /> {f}</li>
               ))}
             </ul>
@@ -304,9 +317,9 @@ function ComboOffer() {
         <div className="rounded-3xl bg-secondary p-6 text-center md:p-10">
           <h2 className="text-2xl font-extrabold md:text-3xl">কেন কম্বো নেবেন?</h2>
           <div className="mt-5 grid grid-cols-3 gap-2 text-sm">
-            <div className="rounded-xl bg-card p-3"><p className="text-muted-foreground">আলাদা কিনলে</p><p className="mt-1 text-lg font-bold line-through">৳{bn(2020)}</p></div>
-            <div className="rounded-xl bg-primary p-3 text-primary-foreground"><p>কম্বোতে</p><p className="mt-1 text-lg font-extrabold">৳{bn(1700)}</p></div>
-            <div className="rounded-xl bg-card p-3"><p className="text-muted-foreground">আপনার সাশ্রয়</p><p className="mt-1 text-lg font-bold text-primary">৳{bn(320)}</p></div>
+            <div className="rounded-xl bg-card p-3"><p className="text-muted-foreground">আলাদা কিনলে</p><p className="mt-1 text-lg font-bold line-through">৳{bn(wasPrice)}</p></div>
+            <div className="rounded-xl bg-primary p-3 text-primary-foreground"><p>কম্বোতে</p><p className="mt-1 text-lg font-extrabold">৳{bn(comboPrice)}</p></div>
+            <div className="rounded-xl bg-card p-3"><p className="text-muted-foreground">আপনার সাশ্রয়</p><p className="mt-1 text-lg font-bold text-primary">৳{bn(save)}</p></div>
           </div>
         </div>
       </Reveal>
@@ -331,9 +344,9 @@ function ComboOffer() {
                 </span>
                 <span className="text-right">
                   <span className="block text-xl font-extrabold text-primary">৳{bn(p.price)}</span>
-                  {"was" in p && <span className="block text-xs text-muted-foreground line-through">৳{bn(p.was)}</span>}
+                  {p.was && <span className="block text-xs text-muted-foreground line-through">৳{bn(p.was)}</span>}
                 </span>
-                {"badge" in p && (
+                {p.badge && (
                   <span className="absolute -top-3 left-4 rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold text-accent-foreground shadow-soft">{p.badge}</span>
                 )}
               </button>
