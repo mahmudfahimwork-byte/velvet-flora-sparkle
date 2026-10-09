@@ -201,7 +201,7 @@ function ComboOffer() {
           <div className="mx-auto flex size-20 animate-[bounce_1s_ease-out_1] items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lift">
             <Check className="size-10" strokeWidth={3} />
           </div>
-          <h1 className="mt-6 text-3xl font-bold text-foreground">ধন্যবাদ! আপনার অর্ডার সম্পন্ন হয়েছে 🎉</h1>
+          <h1 className="mt-6 text-3xl font-bold text-foreground">ধন্যবাদ! আপনার অর্ডার সম্পন্ন হয়েছে</h1>
           <p className="mt-3 text-muted-foreground">অর্ডার নম্বর: <b className="text-foreground">{done}</b></p>
           <p className="mt-1 text-muted-foreground">মোট: <b className="text-foreground">৳{bn(selected.price)}</b> · ডেলিভারি চার্জ ফ্রি</p>
           <p className="mt-4 text-sm text-muted-foreground">আমাদের প্রতিনিধি খুব শীঘ্রই আপনাকে কল করে অর্ডার কনফার্ম করবেন। ফোনটি কাছে রাখুন।</p>
@@ -236,7 +236,7 @@ function ComboOffer() {
             <span className="text-4xl font-extrabold text-primary md:text-5xl">৳{bn(1700)}</span>
             <span className="pb-1 text-lg text-muted-foreground line-through">৳{bn(2020)}</span>
           </div>
-          <p className="mt-1 text-sm font-semibold text-primary">🚚 সারাদেশে ডেলিভারি চার্জ একদম ফ্রি!</p>
+          <p className="mt-1 text-sm font-semibold text-primary">সারাদেশে ডেলিভারি চার্জ একদম ফ্রি!</p>
           <button onClick={scrollToOrder} className="mt-6 hidden w-full animate-pulse rounded-full bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lift transition-transform hover:scale-[1.02] md:inline-block md:w-auto">
             এখনই অর্ডার করুন →
           </button>
