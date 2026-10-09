@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CartRouteImport } from './routes/cart'
+import { Route as ComboOfferRouteImport } from './routes/combo-offer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as ShopRouteImport } from './routes/shop'
@@ -36,6 +37,11 @@ const AdminRoute = AdminRouteImport.update({
 const CartRoute = CartRouteImport.update({
   id: '/cart',
   path: '/cart',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ComboOfferRoute = ComboOfferRouteImport.update({
+  id: '/combo-offer',
+  path: '/combo-offer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
+  '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
+  '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/admin': typeof AdminRoute
   '/cart': typeof CartRoute
+  '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/cart'
+    | '/combo-offer'
     | '/contact'
     | '/order-confirmed'
     | '/shop'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/cart'
+    | '/combo-offer'
     | '/contact'
     | '/order-confirmed'
     | '/shop'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/admin'
     | '/cart'
+    | '/combo-offer'
     | '/contact'
     | '/order-confirmed'
     | '/shop'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AdminRoute: typeof AdminRoute
   CartRoute: typeof CartRoute
+  ComboOfferRoute: typeof ComboOfferRoute
   ContactRoute: typeof ContactRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
   ShopRoute: typeof ShopRoute
@@ -162,6 +175,13 @@ declare module '@tanstack/react-router' {
       path: '/cart'
       fullPath: '/cart'
       preLoaderRoute: typeof CartRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/combo-offer': {
+      id: '/combo-offer'
+      path: '/combo-offer'
+      fullPath: '/combo-offer'
+      preLoaderRoute: typeof ComboOfferRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AdminRoute: AdminRoute,
   CartRoute: CartRoute,
+  ComboOfferRoute: ComboOfferRoute,
   ContactRoute: ContactRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
   ShopRoute: ShopRoute,
