@@ -109,6 +109,44 @@ export const CONTENT_GROUPS = [
       { key: "footer.help3", label: "Order help line 3", default: "Delivery in 2–4 days" },
     ],
   },
+  {
+    group: "কম্বো অফার — দাম (শুধু সংখ্যা লিখুন)",
+    fields: [
+      { key: "combo.price.combo", label: "কম্বো দাম", default: "1700" },
+      { key: "combo.price.was", label: "কম্বোর কাটা দাম (আগের দাম)", default: "2020" },
+      { key: "combo.price.grinder", label: "শুধু গ্রাইন্ডারের দাম", default: "1100" },
+      { key: "combo.price.cooker", label: "শুধু কুকারের দাম", default: "920" },
+    ],
+  },
+  {
+    group: "কম্বো অফার — ছবি",
+    fields: [
+      { key: "combo.img.hero", label: "উপরের বড় ছবি (কম্বো)", default: "", image: true },
+      { key: "combo.img.grinder", label: "গ্রাইন্ডারের ছবি", default: "", image: true },
+      { key: "combo.img.cooker", label: "কুকারের ছবি", default: "", image: true },
+    ],
+  },
+  {
+    group: "কম্বো অফার — লেখা",
+    fields: [
+      { key: "combo.badge", label: "উপরের ছোট ব্যাজ", default: "সীমিত স্টক · স্পেশাল কম্বো" },
+      { key: "combo.title1", label: "শিরোনাম (প্রথম অংশ)", default: "রান্নাঘরের সব ঝামেলা শেষ" },
+      { key: "combo.title2", label: "শিরোনাম (রঙিন অংশ)", default: "এক কম্বোতেই!" },
+      { key: "combo.intro", label: "শিরোনামের নিচের লেখা", long: true, default: "সিলভার ক্রেস্ট ১০০০০ ওয়াট ৮ ব্লেড গ্রাইন্ডার + YN ২ লিটার মাল্টি কুকার — মশলা গুঁড়া থেকে রান্না, সব এক সাথে।" },
+      { key: "combo.delivery", label: "ডেলিভারি লাইন", default: "সারাদেশে ডেলিভারি চার্জ একদম ফ্রি!" },
+      { key: "combo.cta", label: "অর্ডার বাটন", default: "এখনই অর্ডার করুন →" },
+      { key: "combo.trust3.title", label: "ভরসা কার্ড ৩ (রিপ্লেসমেন্ট)", default: "রিপ্লেসমেন্ট সুবিধা" },
+      { key: "combo.trust3.text", label: "ভরসা কার্ড ৩ ছোট লেখা", default: "সমস্যা থাকলে পরিবর্তন" },
+      { key: "combo.combo.title", label: "কম্বো প্যাকেজের নাম", default: "মেগা কিচেন কম্বো" },
+      { key: "combo.grinder.title", label: "গ্রাইন্ডারের নাম", default: "সিলভার ক্রেস্ট ১০০০০ ওয়াট গ্রাইন্ডার" },
+      { key: "combo.grinder.text", label: "গ্রাইন্ডারের বর্ণনা", long: true, default: "শক্তিশালী মোটর আর ৮টি ধারালো স্টিল ব্লেড — শক্ত মশলাও মুহূর্তে মিহি।" },
+      { key: "combo.grinder.features", label: "গ্রাইন্ডারের ফিচার (প্রতি লাইনে একটি)", long: true, default: "৮টি ধারালো স্টেইনলেস স্টিল ব্লেড\n১০০০০ ওয়াট হেভি ডিউটি পাওয়ার\nশুকনো মরিচ, হলুদ, ধনিয়া, জিরা গুঁড়া\nচালের গুঁড়া, কফি বিন্স, বাদাম\nস্বচ্ছ ঢাকনা — গুঁড়া হওয়া চোখে দেখুন" },
+      { key: "combo.cooker.title", label: "কুকারের নাম", default: "YN ২ লিটার মাল্টি কুকার" },
+      { key: "combo.cooker.text", label: "কুকারের বর্ণনা", long: true, default: "ব্যাচেলর, মেস, অফিস বা ছোট পরিবার — চুলা ছাড়াই ঝটপট রান্না।" },
+      { key: "combo.cooker.features", label: "কুকারের ফিচার (প্রতি লাইনে একটি)", long: true, default: "২ লিটার ধারণক্ষমতা — ১-৩ জনের জন্য\nনুডলস, ডিম সেদ্ধ, স্যুপ, খিচুড়ি, হটপট\nনন-স্টিক পাত্র — সহজে পরিষ্কার\nদ্রুত গরম হয়, বিদ্যুৎ সাশ্রয়ী\nহালকা ও বহনযোগ্য" },
+      { key: "combo.thanks", label: "অর্ডারের পর ধন্যবাদ বার্তা", long: true, default: "আমাদের প্রতিনিধি খুব শীঘ্রই আপনাকে কল করে অর্ডার কনফার্ম করবেন। ফোনটি কাছে রাখুন।" },
+    ],
+  },
 ] as const;
 
 export type ContentKey = (typeof CONTENT_GROUPS)[number]["fields"][number]["key"];
