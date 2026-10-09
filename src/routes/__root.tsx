@@ -150,6 +150,8 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  // Ad funnels are fully isolated: no jewellery header, footer or links.
+  const isFunnel = pathname.startsWith("/combo-offer");
 
   useEffect(() => {
     initMetaPixel();
@@ -166,6 +168,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <CartProvider>
+        {isFunnel ? (
+          <Outlet />
+        ) : (
         <div className="flex min-h-screen flex-col">
           <Header />
           <main className="flex-1">
@@ -174,7 +179,8 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
-        {pathname !== "/cart" && (
+        )}
+        {pathname !== "/cart" && !isFunnel && (
         <a
           href="https://facebook.com/velvetflorabd"
           target="_blank"
