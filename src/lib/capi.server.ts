@@ -20,6 +20,7 @@ export type CapiEvent = {
   eventId: string;
   eventSourceUrl?: string | undefined;
   customData?: Record<string, unknown> | undefined;
+  testEventCode?: string | undefined;
   user: CapiUser;
 };
 
@@ -59,7 +60,7 @@ export async function sendServerEvent(event: CapiEvent): Promise<{ ok: boolean; 
   const token = process.env["META_CAPI_ACCESS_TOKEN"];
   if (!token) return { ok: false, error: "missing_token" };
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     data: [
       {
         event_name: event.eventName,
@@ -72,6 +73,7 @@ export async function sendServerEvent(event: CapiEvent): Promise<{ ok: boolean; 
       },
     ],
   };
+  if (event.testEventCode) payload["test_event_code"] = event.testEventCode.toUpperCase();
 
   try {
     const res = await fetch(
