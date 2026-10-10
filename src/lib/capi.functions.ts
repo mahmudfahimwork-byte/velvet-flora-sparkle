@@ -16,7 +16,7 @@ const schema = z.object({
   eventId: z.string().min(4).max(64),
   eventSourceUrl: z.string().url().optional(),
   fbp: z.string().max(200).optional(),
-  fbc: z.string().max(300).optional(),
+  fbc: z.string().max(1000).optional(),
   phone: z.string().max(40).optional(),
   email: z.string().max(120).optional(),
   customerName: z.string().max(120).optional(),
