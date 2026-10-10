@@ -17,6 +17,7 @@ const schema = z.object({
   eventSourceUrl: z.string().url().optional(),
   fbp: z.string().max(200).optional(),
   fbc: z.string().max(1000).optional(),
+  testEventCode: z.string().regex(/^TEST\w{1,20}$/i).optional(),
   phone: z.string().max(40).optional(),
   email: z.string().max(120).optional(),
   customerName: z.string().max(120).optional(),
@@ -39,6 +40,7 @@ export const trackServerEvent = createServerFn({ method: "POST" })
       eventId: data.eventId,
       eventSourceUrl: data.eventSourceUrl,
       customData: data.customData,
+      testEventCode: data.testEventCode,
       user: {
         phone: data.phone,
         email: data.email,
