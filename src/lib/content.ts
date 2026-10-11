@@ -112,10 +112,19 @@ export const CONTENT_GROUPS = [
   {
     group: "কম্বো অফার — দাম (শুধু সংখ্যা লিখুন)",
     fields: [
-      { key: "combo.price.combo", label: "কম্বো দাম", default: "1700" },
+      { key: "combo.price.combo", label: "কম্বো দাম", default: "1650" },
       { key: "combo.price.was", label: "কম্বোর কাটা দাম (আগের দাম)", default: "2020" },
       { key: "combo.price.grinder", label: "শুধু গ্রাইন্ডারের দাম", default: "1100" },
       { key: "combo.price.cooker", label: "শুধু কুকারের দাম", default: "920" },
+    ],
+  },
+  {
+    group: "কম্বো অফার — ডেলিভারি চার্জ",
+    fields: [
+      { key: "combo.delivery.combo.on", label: "কম্বোতে ডেলিভারি চার্জ নেবেন?", default: "off", toggle: true },
+      { key: "combo.delivery.combo.fee", label: "কম্বোর ডেলিভারি চার্জ (টাকা)", default: "120" },
+      { key: "combo.delivery.single.on", label: "সিঙ্গেল পণ্যে (গ্রাইন্ডার/কুকার) ডেলিভারি চার্জ নেবেন?", default: "off", toggle: true },
+      { key: "combo.delivery.single.fee", label: "সিঙ্গেল পণ্যের ডেলিভারি চার্জ (টাকা)", default: "120" },
     ],
   },
   {
@@ -172,4 +181,10 @@ export function useText() {
     const v = data?.[key];
     return v && v.trim() ? v : CONTENT_DEFAULTS[key] ?? "";
   };
+}
+
+/** True once admin-saved text has loaded (or failed), so prices don't flash defaults. */
+export function useContentReady() {
+  const { isFetched } = useQuery(contentQuery);
+  return isFetched;
 }
