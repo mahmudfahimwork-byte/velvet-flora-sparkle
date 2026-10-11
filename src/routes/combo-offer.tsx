@@ -16,9 +16,9 @@ export const Route = createFileRoute("/combo-offer")({
   loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery).catch(() => undefined),
   head: () => ({
     meta: [
-      { title: "কিচেন কম্বো অফার — ১০০০০W গ্রাইন্ডার + ২ লিটার মাল্টি কুকার ৳১,৭০০" },
-      { name: "description", content: "সিলভার ক্রেস্ট ১০০০০ ওয়াট ৮ ব্লেড গ্রাইন্ডার + YN ২ লিটার মাল্টি কুকার মাত্র ৳১,৭০০। সারাদেশে ফ্রি ক্যাশ অন ডেলিভারি।" },
-      { property: "og:title", content: "কিচেন কম্বো — গ্রাইন্ডার + মাল্টি কুকার মাত্র ৳১,৭০০" },
+      { title: "কিচেন কম্বো অফার — ১০০০০W গ্রাইন্ডার + ২ লিটার মাল্টি কুকার ৳১,৬৫০" },
+      { name: "description", content: "সিলভার ক্রেস্ট ১০০০০ ওয়াট ৮ ব্লেড গ্রাইন্ডার + YN ২ লিটার মাল্টি কুকার মাত্র ৳১,৬৫০। সারাদেশে ফ্রি ক্যাশ অন ডেলিভারি।" },
+      { property: "og:title", content: "কিচেন কম্বো — গ্রাইন্ডার + মাল্টি কুকার মাত্র ৳১,৬৫০" },
       { property: "og:description", content: "ফ্রি হোম ডেলিভারি, পণ্য দেখে টাকা পরিশোধ। আজই অর্ডার করুন।" },
       { property: "og:type", content: "product" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -146,7 +146,7 @@ function ComboOffer() {
     setForm((f) => ({ ...f, [k]: v }));
     if (!startedCheckout.current) {
       startedCheckout.current = true;
-      track("InitiateCheckout", { currency: "BDT", value: selected.price });
+      track("InitiateCheckout", { currency: "BDT", value: grand });
     }
   }
 
