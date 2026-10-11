@@ -132,6 +132,15 @@ export function ContentPanel() {
                   <span className="text-sm">{f.label}</span>
                   {"image" in f && f.image ? (
                     <ImageField value={values[f.key] ?? ""} onChange={(url) => setValues((v) => ({ ...v, [f.key]: url }))} />
+                  ) : "toggle" in f && f.toggle ? (
+                    <div className="mt-1 flex gap-2">
+                      {[["off", "OFF — ফ্রি ডেলিভারি"], ["on", "ON — চার্জ নেব"]].map(([val, lbl]) => (
+                        <button key={val} type="button" onClick={() => setValues((v) => ({ ...v, [f.key]: val }))}
+                          className={`rounded-full border px-4 py-2 text-sm ${(values[f.key] ?? "off") === val ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-secondary"}`}>
+                          {lbl}
+                        </button>
+                      ))}
+                    </div>
                   ) : "long" in f && f.long ? (
                     <textarea
                       rows={3}
