@@ -9,10 +9,11 @@ import { WHATSAPP_NUMBER, WhatsAppIcon } from "@/components/site/QuickOrder";
 import heroImg from "@/assets/combo-hero.jpg";
 import grinderImg from "@/assets/combo-grinder.jpg";
 import cookerImg from "@/assets/combo-cooker.jpg";
-import { useText } from "@/lib/content";
+import { useText, useContentReady, contentQuery } from "@/lib/content";
 import { cdnImage } from "@/components/site/SmartImage";
 
 export const Route = createFileRoute("/combo-offer")({
+  loader: ({ context }) => context.queryClient.ensureQueryData(contentQuery).catch(() => undefined),
   head: () => ({
     meta: [
       { title: "কিচেন কম্বো অফার — ১০০০০W গ্রাইন্ডার + ২ লিটার মাল্টি কুকার ৳১,৭০০" },
@@ -122,7 +123,11 @@ function ComboOffer() {
   const lines = (k: "combo.grinder.features" | "combo.cooker.features") => t(k).split("\n").map((x) => x.trim()).filter(Boolean);
   const [pkg, setPkg] = useState<PkgId>("combo");
   const selected = PACKAGES.find((p) => p.id === pkg)!;
-  const total = useCountUp(selected.price);
+  const ready = useContentReady();
+  const feeOn = t(pkg === "combo" ? "combo.delivery.combo.on" : "combo.delivery.single.on").trim().toLowerCase() === "on";
+  const fee = feeOn ? num(t(pkg === "combo" ? "combo.delivery.combo.fee" : "combo.delivery.single.fee"), 0) : 0;
+  const grand = selected.price + fee;
+  const total = useCountUp(grand);
   const timer = useCountdown();
   const [form, setForm] = useState({ customer_name: "", phone: "", address: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -184,8 +189,8 @@ function ComboOffer() {
         items: [{ name: selected.name, qty: 1, price: selected.price, slug: selected.slug }],
         subtotal: selected.price,
         discount: 0,
-        delivery_fee: 0,
-        total: selected.price,
+        delivery_fee: fee,
+        total: grand,
       });
       error = res.error;
     } catch (err) {
@@ -200,7 +205,7 @@ function ComboOffer() {
     }
     track(
       "Purchase",
-      { value: selected.price, currency: "BDT", content_type: "product", content_ids: [selected.slug], num_items: 1, order_id: code },
+      { value: grand, currency: "BDT", content_type: "product", content_ids: [selected.slug], num_items: 1, order_id: code },
       { phone: parsed.data.phone, customerName: parsed.data.customer_name },
     );
     setDone(code);
@@ -216,7 +221,7 @@ function ComboOffer() {
           </div>
           <h1 className="mt-6 text-3xl font-bold text-foreground">ধন্যবাদ! আপনার অর্ডার সম্পন্ন হয়েছে</h1>
           <p className="mt-3 text-muted-foreground">অর্ডার নম্বর: <b className="text-foreground">{done}</b></p>
-          <p className="mt-1 text-muted-foreground">মোট: <b className="text-foreground">৳{bn(selected.price)}</b> · ডেলিভারি চার্জ ফ্রি</p>
+          <p className="mt-1 text-muted-foreground">মোট: <b className="text-foreground">৳{bn(grand)}</b> · {fee ? `ডেলিভারি চার্জ ৳${bn(fee)} সহ` : "ডেলিভারি চার্জ ফ্রি"}</p>
           <p className="mt-4 text-sm text-muted-foreground">{t("combo.thanks")}</p>
         </div>
       </div>
@@ -246,8 +251,8 @@ function ComboOffer() {
             {t("combo.intro")}
           </p>
           <div className="mt-5 flex items-end justify-center gap-3 md:justify-start">
-            <span className="text-4xl font-extrabold text-primary md:text-5xl">৳{bn(comboPrice)}</span>
-            <span className="pb-1 text-lg text-muted-foreground line-through">৳{bn(wasPrice)}</span>
+            <span className={`text-4xl font-extrabold text-primary transition-opacity md:text-5xl ${ready ? "opacity-100" : "opacity-0"}`}>৳{bn(comboPrice)}</span>
+            <span className={`pb-1 text-lg text-muted-foreground line-through ${ready ? "opacity-100" : "opacity-0"}`}>৳{bn(wasPrice)}</span>
           </div>
           <p className="mt-1 text-sm font-semibold text-primary">{t("combo.delivery")}</p>
           <button onClick={scrollToOrder} className="mt-6 hidden w-full animate-pulse rounded-full bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-lift transition-transform hover:scale-[1.02] md:inline-block md:w-auto">
@@ -376,13 +381,13 @@ function ComboOffer() {
 
           <div className="space-y-1.5 rounded-xl bg-secondary p-4 text-sm">
             <div className="flex justify-between"><span>{selected.title}</span><span>৳{bn(selected.price)}</span></div>
-            <div className="flex justify-between"><span>ডেলিভারি চার্জ</span><span className="font-bold text-primary">ফ্রি ৳০</span></div>
+            <div className="flex justify-between"><span>ডেলিভারি চার্জ</span>{fee ? <span className="font-bold">৳{bn(fee)}</span> : <span className="font-bold text-primary">ফ্রি ৳০</span>}</div>
             <div className="flex justify-between border-t border-border pt-2 text-lg font-extrabold"><span>সর্বমোট</span><span className="tabular-nums text-primary">৳{bn(total)}</span></div>
           </div>
 
-          <button type="submit" disabled={submitting}
+          <button type="submit" disabled={submitting || !ready}
             className="w-full rounded-full bg-primary py-4 text-lg font-extrabold text-primary-foreground shadow-lift transition-transform hover:scale-[1.01] active:scale-95 disabled:opacity-60">
-            {submitting ? "অর্ডার পাঠানো হচ্ছে..." : `অর্ডার কনফার্ম করুন — ৳${bn(selected.price)}`}
+            {submitting ? "অর্ডার পাঠানো হচ্ছে..." : `অর্ডার কনফার্ম করুন — ৳${bn(grand)}`}
           </button>
           <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground"><ShieldCheck className="size-4 text-primary" /> আপনার তথ্য সম্পূর্ণ নিরাপদ</p>
 
@@ -402,8 +407,8 @@ function ComboOffer() {
 
       {/* Mobile sticky CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 p-3 backdrop-blur md:hidden">
-        <button type="submit" form="combo-form" disabled={submitting} className="w-full animate-pulse rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-lift disabled:opacity-60">
-          {submitting ? "অর্ডার পাঠানো হচ্ছে..." : `অর্ডার কনফার্ম করুন — ৳${bn(selected.price)} · ফ্রি ডেলিভারি`}
+        <button type="submit" form="combo-form" disabled={submitting || !ready} className="w-full animate-pulse rounded-full bg-primary py-3.5 text-base font-extrabold text-primary-foreground shadow-lift disabled:opacity-60">
+          {submitting ? "অর্ডার পাঠানো হচ্ছে..." : !ready ? "অর্ডার কনফার্ম করুন" : `অর্ডার কনফার্ম করুন — ৳${bn(grand)}${fee ? "" : " · ফ্রি ডেলিভারি"}`}
         </button>
       </div>
     </div>
