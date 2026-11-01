@@ -14,7 +14,7 @@ export const Route = createFileRoute("/shop")({
   loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
   head: () => ({
     meta: [
-      { title: "Shop Bracelets, Pendants & Anklets — Velvet Flora" },
+      { title: "Shop Kitchen, Home Decor & Gadgets — Velvet Flora" },
       {
         name: "description",
         content:
