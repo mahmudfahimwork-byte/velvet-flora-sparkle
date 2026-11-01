@@ -120,7 +120,7 @@ export function ManualOrderCard({ onAdded }: { onAdded: (order: Order) => void }
           <input
             value={form.items}
             onChange={(e) => set("items", e.target.value)}
-            placeholder="Items (e.g. Pearl bracelet x1, Anklet x1)"
+            placeholder="Items (e.g. Grinder x1, Multi cooker x1)"
             className="rounded-lg border border-input bg-background px-3 py-2 text-sm sm:col-span-2"
           />
           <input

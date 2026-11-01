@@ -15,6 +15,7 @@ import { VisitorsPanel } from "@/components/admin/VisitorsPanel";
 import { ReviewsPanel } from "@/components/admin/ReviewsPanel";
 import { BundlePanel } from "@/components/admin/BundlePanel";
 import { ContentPanel } from "@/components/admin/ContentPanel";
+import { LandingPanel } from "@/components/admin/LandingPanel";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -187,6 +188,7 @@ const TABS = [
   { key: "products", label: "Products" },
   { key: "reviews", label: "Reviews" },
   { key: "visitors", label: "Visitors" },
+  { key: "landing", label: "Landing pages" },
   { key: "content", label: "Site text" },
   { key: "settings", label: "Settings" },
 ] as const;
@@ -297,6 +299,7 @@ function Dashboard() {
       {tab === "products" && <ProductsPanel onCountChange={setProductCount} />}
       {tab === "reviews" && <ReviewsPanel />}
       {tab === "visitors" && <VisitorsPanel />}
+      {tab === "landing" && <LandingPanel />}
       {tab === "content" && <ContentPanel />}
       {tab === "settings" && (
         <div className="space-y-4">

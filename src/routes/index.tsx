@@ -6,6 +6,8 @@ import { productsQuery } from "@/lib/queries";
 import { contentQuery } from "@/lib/content";
 import { CATEGORIES } from "@/lib/shop";
 import { useText } from "@/lib/content";
+import { useLandingPages } from "@/lib/landing";
+import { cdnImage } from "@/components/site/SmartImage";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
@@ -14,16 +16,16 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { title: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
       {
         name: "description",
         content:
-          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+          "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh.",
       },
-      { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { property: "og:title", content: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
       {
         property: "og:description",
-        content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+        content: "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh.",
       },
     ],
     links: [
@@ -38,6 +40,8 @@ function Index() {
   const initial = Route.useLoaderData();
   const { data: products } = useQuery({ ...productsQuery, ...(initial ? { initialData: initial } : {}) });
   const featured = (products ?? []).filter((p) => p.featured);
+  const { pages } = useLandingPages();
+  const offers = pages.filter((p) => p.active && p.showOnHome);
 
 
   return (
@@ -72,7 +76,7 @@ function Index() {
           <div className="overflow-hidden rounded-2xl shadow-[var(--shadow-soft)]">
             <SmartImage
               src="/images/hero.jpg"
-              alt="Gold bracelet, pendant and anklet arranged on blush silk with dried flowers"
+              alt="Modern kitchen appliances, home decor and gadgets on a bright counter"
               width={1600}
               height={1008}
               fetchPriority="high"
@@ -98,6 +102,32 @@ function Index() {
           ))}
         </div>
       </section>
+
+      {offers.length > 0 && (
+        <section className="mx-auto max-w-6xl px-5 pt-16">
+          <div className="mb-6 text-center">
+            <p className="eyebrow">Special offers</p>
+            <h2 className="mt-2 text-3xl">Hot deals & combos</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {offers.map((o) => {
+              const first = o.packages[0];
+              const img = o.heroImage || first?.image;
+              return (
+                <Link key={o.slug} to="/offer/$slug" params={{ slug: o.slug }}
+                  className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-[var(--shadow-soft)]">
+                  {img && <img src={cdnImage(img)} alt={o.title} loading="lazy" className="aspect-[4/3] w-full object-cover" />}
+                  <div className="p-4">
+                    <p className="font-display text-xl">{o.title} {o.highlight}</p>
+                    {first && <p className="mt-1 font-semibold text-primary">From ৳{Math.min(...o.packages.map((k) => k.price)).toLocaleString("en-US")}</p>}
+                    <p className="eyebrow mt-2">View offer →</p>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       <section className="mx-auto max-w-6xl px-5 pt-20">
         <div className="mb-8 text-center">

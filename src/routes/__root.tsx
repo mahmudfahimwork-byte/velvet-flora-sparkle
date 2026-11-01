@@ -88,20 +88,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { title: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
       {
         name: "description",
         content:
-          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+          "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh.",
       },
       { name: "author", content: "Velvet Flora" },
       { name: "facebook-domain-verification", content: "2m5agycihp0dj3vupmyjji8kyh4nre" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
-      { name: "twitter:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
-      { property: "og:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
-      { name: "twitter:description", content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh." },
+      { property: "og:title", content: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
+      { name: "twitter:title", content: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
+      { property: "og:description", content: "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh." },
+      { name: "twitter:description", content: "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/605838e253429157cf7a848c4302ba4c/id-preview-dfe54c88--1e45dbb0-d212-418e-980f-f9f1700ad42f.lovable.app-1786220649572.png" },
     ],
@@ -151,7 +151,7 @@ function RootComponent() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Ad funnels are fully isolated: no jewellery header, footer or links.
-  const isFunnel = pathname.startsWith("/combo-offer");
+  const isFunnel = pathname.startsWith("/combo-offer") || pathname.startsWith("/offer/");
 
   useEffect(() => {
     initMetaPixel();

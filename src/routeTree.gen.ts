@@ -17,6 +17,7 @@ import { Route as ComboOfferRouteImport } from './routes/combo-offer'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as ShopRouteImport } from './routes/shop'
+import { Route as OfferSlugRouteImport } from './routes/offer.$slug'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const ShopRoute = ShopRouteImport.update({
   path: '/shop',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OfferSlugRoute = OfferSlugRouteImport.update({
+  id: '/offer/$slug',
+  path: '/offer/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductSlugRoute = ProductSlugRouteImport.update({
   id: '/product/$slug',
   path: '/product/$slug',
@@ -74,6 +80,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
+  '/offer/$slug': typeof OfferSlugRoute
   '/product/$slug': typeof ProductSlugRoute
 }
 export interface FileRoutesByTo {
@@ -85,6 +92,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
+  '/offer/$slug': typeof OfferSlugRoute
   '/product/$slug': typeof ProductSlugRoute
 }
 export interface FileRoutesById {
@@ -97,6 +105,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
+  '/offer/$slug': typeof OfferSlugRoute
   '/product/$slug': typeof ProductSlugRoute
 }
 export interface FileRouteTypes {
@@ -110,6 +119,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/order-confirmed'
     | '/shop'
+    | '/offer/$slug'
     | '/product/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -121,6 +131,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/order-confirmed'
     | '/shop'
+    | '/offer/$slug'
     | '/product/$slug'
   id:
     | '__root__'
@@ -132,6 +143,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/order-confirmed'
     | '/shop'
+    | '/offer/$slug'
     | '/product/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -144,6 +156,7 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
   ShopRoute: typeof ShopRoute
+  OfferSlugRoute: typeof OfferSlugRoute
   ProductSlugRoute: typeof ProductSlugRoute
 }
 
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ShopRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/offer/$slug': {
+      id: '/offer/$slug'
+      path: '/offer/$slug'
+      fullPath: '/offer/$slug'
+      preLoaderRoute: typeof OfferSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/product/$slug': {
       id: '/product/$slug'
       path: '/product/$slug'
@@ -224,6 +244,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
   ShopRoute: ShopRoute,
+  OfferSlugRoute: OfferSlugRoute,
   ProductSlugRoute: ProductSlugRoute,
 }
 export const routeTree = rootRouteImport

@@ -7,7 +7,7 @@ import { CATEGORIES, categoryLabel, taka, type Product } from "@/lib/shop";
 const EMPTY = {
   name: "",
   slug: "",
-  category: "bracelet",
+  category: "kitchen",
   price: 700,
   description: "",
   image_url: "",

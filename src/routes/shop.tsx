@@ -14,16 +14,16 @@ export const Route = createFileRoute("/shop")({
   loader: ({ context }) => context.queryClient.ensureQueryData(productsQuery),
   head: () => ({
     meta: [
-      { title: "Shop Bracelets, Pendants & Anklets — Velvet Flora" },
+      { title: "Shop Kitchen, Home Decor & Gadgets — Velvet Flora" },
       {
         name: "description",
         content:
-          "Browse every Velvet Flora piece: bracelets, pendants and anklets from ৳500 to ৳1000 with cash on delivery.",
+          "Browse Velvet Flora kitchen appliances, home decor and gadgets with cash on delivery across Bangladesh.",
       },
       { property: "og:title", content: "Shop — Velvet Flora" },
       {
         property: "og:description",
-        content: "Dainty bracelets, pendants and anklets from ৳500. Cash on delivery in Bangladesh.",
+        content: "Kitchen appliances, home decor and gadgets. Cash on delivery in Bangladesh.",
       },
     ],
   }),

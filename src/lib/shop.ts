@@ -14,9 +14,9 @@ export type Product = {
 };
 
 export const CATEGORIES = [
-  { key: "bracelet", label: "Bracelets" },
-  { key: "pendant", label: "Pendants" },
-  { key: "anklet", label: "Anklets" },
+  { key: "kitchen", label: "Kitchen Appliances" },
+  { key: "home-decor", label: "Home Decor" },
+  { key: "gadget", label: "Gadgets" },
 ] as const;
 
 export const DELIVERY = {

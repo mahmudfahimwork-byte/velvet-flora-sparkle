@@ -4,16 +4,16 @@ import { useText } from "@/lib/content";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "Our Story — Velvet Flora Jewellery" },
+      { title: "Our Story — Velvet Flora" },
       {
         name: "description",
         content:
-          "Velvet Flora is a small Bangladeshi jewellery label making soft, wearable bracelets, pendants and anklets.",
+          "Velvet Flora is a Bangladeshi online shop for useful kitchen appliances, home decor and gadgets.",
       },
       { property: "og:title", content: "Our Story — Velvet Flora" },
       {
         property: "og:description",
-        content: "A small Bangladeshi jewellery label built on soft, everyday pieces.",
+        content: "Useful kitchen, home and gadget products with cash on delivery.",
       },
     ],
   }),
