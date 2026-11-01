@@ -6,7 +6,7 @@ import { CONTENT_DEFAULTS, CONTENT_GROUPS, contentQuery } from "@/lib/content";
 import { compressImage, formatFileSize } from "@/lib/image-compression";
 import { cdnImage } from "@/components/site/SmartImage";
 
-function ImageField({ value, onChange }: { value: string; onChange: (url: string) => void }) {
+export function ImageField({ value, onChange }: { value: string; onChange: (url: string) => void }) {
   const [busy, setBusy] = useState(false);
   async function upload(file: File) {
     setBusy(true);
