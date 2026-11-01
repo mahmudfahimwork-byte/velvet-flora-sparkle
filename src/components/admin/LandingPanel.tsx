@@ -62,7 +62,7 @@ export function LandingPanel() {
         onCancel={() => setEditing(null)}
         onSave={async (p) => {
           const clash = pages.some((o, i) => o.slug === p.slug && i !== editing);
-          if (clash) return toast.error("Another page already uses this link name");
+          if (clash) { toast.error("Another page already uses this link name"); return; }
           const next = editing === -1 ? [...pages, p] : pages.map((o, i) => (i === editing ? p : o));
           if (await persist(next)) setEditing(null);
         }}
@@ -127,10 +127,10 @@ function Editor({
 
   function save() {
     const slug = slugify(p.slug || p.title);
-    if (!slug) return toast.error("Add a link name in English, e.g. kitchen-combo");
-    if (!p.title.trim()) return toast.error("Add a headline");
+    if (!slug) { toast.error("Add a link name in English, e.g. kitchen-combo"); return; }
+    if (!p.title.trim()) { toast.error("Add a headline"); return; }
     if (!p.packages.length || p.packages.some((k) => !k.name.trim() || k.price <= 0))
-      return toast.error("Every option needs a name and price");
+      { toast.error("Every option needs a name and price"); return; }
     onSave({ ...p, slug });
   }
 
