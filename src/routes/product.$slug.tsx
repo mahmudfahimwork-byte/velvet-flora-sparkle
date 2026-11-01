@@ -25,7 +25,7 @@ export const Route = createFileRoute("/product/$slug")({
         {
           name: "description",
           content:
-            "Delicate jewellery from Velvet Flora with cash on delivery across Bangladesh. Order in a minute.",
+            "Quality products from Velvet Flora with cash on delivery across Bangladesh. Order in a minute.",
         },
         { property: "og:title", content: title },
         {

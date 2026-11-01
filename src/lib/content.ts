@@ -7,67 +7,67 @@ export const CONTENT_GROUPS = [
     group: "Home — hero",
     fields: [
       { key: "home.eyebrow", label: "Small line above title", default: "Velvet Flora · Bangladesh" },
-      { key: "home.title1", label: "Headline (line 1)", default: "Little pieces that" },
-      { key: "home.title2", label: "Headline (line 2, italic)", default: "bloom on you." },
+      { key: "home.title1", label: "Headline (line 1)", default: "Smart products for" },
+      { key: "home.title2", label: "Headline (line 2, italic)", default: "a better home." },
       {
         key: "home.intro",
         label: "Intro paragraph",
         default:
-          "Bracelets, pendants and anklets picked for soft everyday wear — mostly ৳500 to ৳1000, with cash on delivery anywhere in Bangladesh.",
+          "Kitchen appliances, home decor and handy gadgets — tested, fairly priced, with cash on delivery anywhere in Bangladesh.",
         long: true,
       },
-      { key: "home.cta1", label: "Primary button", default: "Shop the collection" },
-      { key: "home.cta2", label: "Secondary button", default: "Our story" },
+      { key: "home.cta1", label: "Primary button", default: "Shop now" },
+      { key: "home.cta2", label: "Secondary button", default: "About us" },
     ],
   },
   {
     group: "Home — featured & promises",
     fields: [
       { key: "home.featured.eyebrow", label: "Featured eyebrow", default: "Loved this week" },
-      { key: "home.featured.title", label: "Featured heading", default: "Featured pieces" },
-      { key: "home.featured.cta", label: "View all button", default: "View all jewellery" },
+      { key: "home.featured.title", label: "Featured heading", default: "Featured products" },
+      { key: "home.featured.cta", label: "View all button", default: "View all products" },
       { key: "home.promise1.title", label: "Promise 1 title", default: "Cash on delivery" },
       { key: "home.promise1.text", label: "Promise 1 text", default: "Pay the courier when your parcel arrives." },
       { key: "home.promise2.title", label: "Promise 2 title", default: "Nationwide delivery" },
       { key: "home.promise2.text", label: "Promise 2 text", default: "Inside Dhaka ৳60 · Outside Dhaka ৳120." },
-      { key: "home.promise3.title", label: "Promise 3 title", default: "Gift ready" },
-      { key: "home.promise3.text", label: "Promise 3 text", default: "Every order is packed in a little gift pouch." },
+      { key: "home.promise3.title", label: "Promise 3 title", default: "Checked before shipping" },
+      { key: "home.promise3.text", label: "Promise 3 text", default: "Every product is tested and safely packed." },
     ],
   },
   {
     group: "Shop page",
     fields: [
-      { key: "shop.eyebrow", label: "Eyebrow", default: "The collection" },
+      { key: "shop.eyebrow", label: "Eyebrow", default: "All products" },
       { key: "shop.title", label: "Heading", default: "Shop all" },
     ],
   },
   {
     group: "About page",
     fields: [
-      { key: "about.eyebrow", label: "Eyebrow", default: "Our story" },
-      { key: "about.title", label: "Heading", default: "Made for the quiet kind of pretty" },
+      { key: "about.eyebrow", label: "Eyebrow", default: "About us" },
+      { key: "about.title", label: "Heading", default: "Useful things for every home" },
       {
         key: "about.p1",
         label: "Paragraph 1",
         long: true,
         default:
-          "Velvet Flora started with one simple idea: jewellery you can actually wear every day — to class, to work, to a friend's wedding — without worrying about the price tag.",
+          "Velvet Flora brings you practical kitchen appliances, home decor and gadgets that make everyday life easier — at prices that make sense.",
       },
       {
         key: "about.p2",
         label: "Paragraph 2",
         long: true,
         default:
-          "Every bracelet, pendant and anklet is handpicked for its finish and comfort. Most of our pieces sit between ৳500 and ৳1000 so you can collect a few favourites instead of saving for one.",
+          "Every product is chosen for quality and checked before it ships, so you get exactly what you saw.",
       },
       {
         key: "about.p3",
         label: "Paragraph 3",
         long: true,
         default:
-          "We deliver all over Bangladesh with cash on delivery, so you only pay once the parcel is in your hands. Each order arrives in a little gift pouch, ready to keep or give away.",
+          "We deliver all over Bangladesh with cash on delivery, so you only pay once the parcel is in your hands.",
       },
-      { key: "about.cta", label: "Button", default: "Browse the collection" },
+      { key: "about.cta", label: "Button", default: "Browse products" },
     ],
   },
   {
@@ -102,7 +102,7 @@ export const CONTENT_GROUPS = [
         label: "Tagline",
         long: true,
         default:
-          "Dainty bracelets, pendants and anklets for everyday softness. Cash on delivery all over Bangladesh.",
+          "Kitchen appliances, home decor and gadgets. Cash on delivery all over Bangladesh.",
       },
       { key: "footer.help1", label: "Order help line 1", default: "Cash on delivery available" },
       { key: "footer.help2", label: "Order help line 2", default: "Inside Dhaka ৳60 · Outside ৳120" },

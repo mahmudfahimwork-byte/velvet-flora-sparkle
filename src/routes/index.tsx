@@ -14,16 +14,16 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { title: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
       {
         name: "description",
         content:
-          "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+          "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh.",
       },
-      { property: "og:title", content: "Velvet Flora — Bracelets, Pendants & Anklets in BD" },
+      { property: "og:title", content: "Velvet Flora — Kitchen, Home Decor & Gadgets in BD" },
       {
         property: "og:description",
-        content: "Dainty handpicked bracelets, pendants and anklets from ৳500 to ৳1000. Cash on delivery all over Bangladesh.",
+        content: "Kitchen appliances, home decor and smart gadgets at honest prices. Cash on delivery all over Bangladesh.",
       },
     ],
     links: [

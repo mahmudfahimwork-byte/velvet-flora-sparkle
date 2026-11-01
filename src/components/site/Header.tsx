@@ -27,7 +27,7 @@ export function Header() {
 
         <Link to="/" className="flex flex-col leading-none">
           <span className="font-display text-2xl tracking-tight">Velvet Flora</span>
-          <span className="eyebrow mt-1 hidden sm:block">Handpicked jewellery</span>
+          <span className="eyebrow mt-1 hidden sm:block">Kitchen · Home · Gadgets</span>
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm md:flex">
