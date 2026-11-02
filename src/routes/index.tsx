@@ -8,6 +8,7 @@ import { CATEGORIES } from "@/lib/shop";
 import { useText } from "@/lib/content";
 import { useLandingPages } from "@/lib/landing";
 import { cdnImage } from "@/components/site/SmartImage";
+import comboHero from "@/assets/combo-hero.jpg";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
@@ -103,13 +104,22 @@ function Index() {
         </div>
       </section>
 
-      {offers.length > 0 && (
+      {(
         <section className="mx-auto max-w-6xl px-5 pt-16">
           <div className="mb-6 text-center">
             <p className="eyebrow">Special offers</p>
             <h2 className="mt-2 text-3xl">Hot deals & combos</h2>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Link to="/combo-offer"
+              className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-[var(--shadow-soft)]">
+              <img src={t("combo.img.hero") ? cdnImage(t("combo.img.hero")) : comboHero} alt="Grinder + Multi Cooker combo" loading="lazy" className="aspect-[4/3] w-full object-cover" />
+              <div className="p-4">
+                <p className="font-display text-xl">Grinder + Multi Cooker Combo</p>
+                <p className="mt-1 font-semibold text-primary">Free delivery · Cash on delivery</p>
+                <p className="eyebrow mt-2">View offer →</p>
+              </div>
+            </Link>
             {offers.map((o) => {
               const first = o.packages[0];
               const img = o.heroImage || first?.image;
