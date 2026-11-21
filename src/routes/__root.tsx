@@ -151,7 +151,7 @@ function RootComponent() {
   const router = useRouter();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   // Ad funnels are fully isolated: no jewellery header, footer or links.
-  const isFunnel = pathname.startsWith("/combo-offer") || pathname.startsWith("/offer/");
+  const isFunnel = pathname.startsWith("/combo-offer") || pathname.startsWith("/fascia-gun") || pathname.startsWith("/offer/");
 
   useEffect(() => {
     initMetaPixel();

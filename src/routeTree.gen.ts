@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CartRouteImport } from './routes/cart'
 import { Route as ComboOfferRouteImport } from './routes/combo-offer'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as FasciaGunRouteImport } from './routes/fascia-gun'
 import { Route as OrderConfirmedRouteImport } from './routes/order-confirmed'
 import { Route as ShopRouteImport } from './routes/shop'
 import { Route as OfferSlugRouteImport } from './routes/offer.$slug'
@@ -50,6 +51,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FasciaGunRoute = FasciaGunRouteImport.update({
+  id: '/fascia-gun',
+  path: '/fascia-gun',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OrderConfirmedRoute = OrderConfirmedRouteImport.update({
   id: '/order-confirmed',
   path: '/order-confirmed',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/cart': typeof CartRoute
   '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
+  '/fascia-gun': typeof FasciaGunRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
   '/offer/$slug': typeof OfferSlugRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/cart': typeof CartRoute
   '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
+  '/fascia-gun': typeof FasciaGunRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
   '/offer/$slug': typeof OfferSlugRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/cart': typeof CartRoute
   '/combo-offer': typeof ComboOfferRoute
   '/contact': typeof ContactRoute
+  '/fascia-gun': typeof FasciaGunRoute
   '/order-confirmed': typeof OrderConfirmedRoute
   '/shop': typeof ShopRoute
   '/offer/$slug': typeof OfferSlugRoute
@@ -117,6 +126,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/combo-offer'
     | '/contact'
+    | '/fascia-gun'
     | '/order-confirmed'
     | '/shop'
     | '/offer/$slug'
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/combo-offer'
     | '/contact'
+    | '/fascia-gun'
     | '/order-confirmed'
     | '/shop'
     | '/offer/$slug'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/cart'
     | '/combo-offer'
     | '/contact'
+    | '/fascia-gun'
     | '/order-confirmed'
     | '/shop'
     | '/offer/$slug'
@@ -154,6 +166,7 @@ export interface RootRouteChildren {
   CartRoute: typeof CartRoute
   ComboOfferRoute: typeof ComboOfferRoute
   ContactRoute: typeof ContactRoute
+  FasciaGunRoute: typeof FasciaGunRoute
   OrderConfirmedRoute: typeof OrderConfirmedRoute
   ShopRoute: typeof ShopRoute
   OfferSlugRoute: typeof OfferSlugRoute
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/fascia-gun': {
+      id: '/fascia-gun'
+      path: '/fascia-gun'
+      fullPath: '/fascia-gun'
+      preLoaderRoute: typeof FasciaGunRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/order-confirmed': {
       id: '/order-confirmed'
       path: '/order-confirmed'
@@ -242,6 +262,7 @@ const rootRouteChildren: RootRouteChildren = {
   CartRoute: CartRoute,
   ComboOfferRoute: ComboOfferRoute,
   ContactRoute: ContactRoute,
+  FasciaGunRoute: FasciaGunRoute,
   OrderConfirmedRoute: OrderConfirmedRoute,
   ShopRoute: ShopRoute,
   OfferSlugRoute: OfferSlugRoute,
