@@ -156,6 +156,25 @@ export const CONTENT_GROUPS = [
       { key: "combo.thanks", label: "অর্ডারের পর ধন্যবাদ বার্তা", long: true, default: "আমাদের প্রতিনিধি খুব শীঘ্রই আপনাকে কল করে অর্ডার কনফার্ম করবেন। ফোনটি কাছে রাখুন।" },
     ],
   },
+  {
+    group: "ফ্যাশিয়া গান পেজ",
+    fields: [
+      { key: "fascia.price", label: "দাম (শুধু সংখ্যা)", default: "1090" },
+      { key: "fascia.was", label: "কাটা দাম (আগের দাম)", default: "1850" },
+      { key: "fascia.delivery.on", label: "ডেলিভারি চার্জ নেবেন?", default: "off", toggle: true },
+      { key: "fascia.delivery.fee", label: "ডেলিভারি চার্জ (টাকা)", default: "120" },
+      { key: "fascia.img.hero", label: "উপরের বড় ছবি", default: "", image: true },
+      { key: "fascia.img.heads", label: "বক্সের জিনিসপত্রের ছবি", default: "", image: true },
+      { key: "fascia.badge", label: "উপরের ছোট ব্যাজ", default: "সীমিত সময়ের অফার" },
+      { key: "fascia.title1", label: "শিরোনাম (প্রথম অংশ)", default: "ঘাড়, পিঠ ও কোমরের ব্যথা?" },
+      { key: "fascia.title2", label: "শিরোনাম (রঙিন অংশ)", default: "ঘরেই নিন ম্যাসাজ গান" },
+      { key: "fascia.intro", label: "শিরোনামের নিচের লেখা", long: true, default: "সাধারণ ১ হেড নয় — ৩-বল আর্চ হেড সহ মাল্টি-ফাংশনাল ফ্যাশিয়া গান। ১০ মিনিটে পেশির টান ও ক্লান্তি দূর করুন।" },
+      { key: "fascia.deliveryLine", label: "ডেলিভারি লাইন", default: "সারাদেশে ফ্রি হোম ডেলিভারি · ক্যাশ অন ডেলিভারি" },
+      { key: "fascia.cta", label: "অর্ডার বাটন", default: "এখনই অর্ডার করুন" },
+      { key: "fascia.features", label: "বক্সে যা পাবেন (প্রতি লাইনে একটি)", long: true, default: "৩-বল আর্চ হেড — একসাথে বড় জায়গায় ম্যাসাজ\nএকাধিক ম্যাসাজ হেড — ঘাড়, মেরুদণ্ড, কোমর, পায়ের তলা\nহাতে কম্পন কম — দীর্ঘক্ষণ আরামে ধরা যায়\nছোট ও হালকা — এক হাতে সহজে ব্যবহার\nরিচার্জেবল — তার ছাড়াই যেকোনো জায়গায়\nশক্তিশালী ডিপ টিস্যু ম্যাসাজ" },
+      { key: "fascia.thanks", label: "অর্ডারের পর ধন্যবাদ বার্তা", long: true, default: "আমাদের প্রতিনিধি শীঘ্রই কল করে অর্ডার কনফার্ম করবেন।" },
+    ],
+  },
 ] as const;
 
 export type ContentKey = (typeof CONTENT_GROUPS)[number]["fields"][number]["key"];
