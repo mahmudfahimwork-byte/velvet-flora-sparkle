@@ -1,6 +1,4 @@
 const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
-const MAX_IMAGE_EDGE = 1600;
-const WEBP_QUALITY = 0.78;
 
 export type CompressedImage = {
   file: File;
@@ -8,14 +6,12 @@ export type CompressedImage = {
   compressedBytes: number;
 };
 
-function canvasToBlob(canvas: HTMLCanvasElement) {
-  return new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob(
-      (blob) => (blob ? resolve(blob) : reject(new Error("Could not compress this photo"))),
-      "image/webp",
-      WEBP_QUALITY,
-    );
-  });
+const TARGET_BYTES = 250 * 1024;
+const EDGES = [1200, 1000, 800, 640];
+const QUALITIES = [0.78, 0.65, 0.55, 0.45];
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number) {
+  return new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
 }
 
 export async function compressImage(file: File): Promise<CompressedImage> {
@@ -32,32 +28,42 @@ export async function compressImage(file: File): Promise<CompressedImage> {
     throw new Error("This photo format is not supported. Please use JPG, PNG, or WebP");
   }
 
-  const scale = Math.min(1, MAX_IMAGE_EDGE / Math.max(bitmap.width, bitmap.height));
-  const width = Math.max(1, Math.round(bitmap.width * scale));
-  const height = Math.max(1, Math.round(bitmap.height * scale));
   const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
   const context = canvas.getContext("2d");
   if (!context) {
     bitmap.close();
     throw new Error("Could not prepare this photo");
   }
 
-  context.drawImage(bitmap, 0, 0, width, height);
-  bitmap.close();
-  const compressed = await canvasToBlob(canvas);
-  const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
-  const output = new File([compressed], `${baseName}.webp`, {
-    type: "image/webp",
-    lastModified: Date.now(),
-  });
+  let best: Blob | null = null;
+  try {
+    outer: for (const edge of EDGES) {
+      const scale = Math.min(1, edge / Math.max(bitmap.width, bitmap.height));
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      // White background so transparent PNGs don't turn black as JPEG.
+      context.fillStyle = "#ffffff";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      for (const q of QUALITIES) {
+        let blob = await canvasToBlob(canvas, "image/webp", q);
+        // Some browsers (Safari) silently return PNG instead of WebP — use JPEG then.
+        if (!blob || blob.type !== "image/webp") blob = await canvasToBlob(canvas, "image/jpeg", q);
+        if (!blob) continue;
+        if (!best || blob.size < best.size) best = blob;
+        if (blob.size <= TARGET_BYTES) break outer;
+      }
+    }
+  } finally {
+    bitmap.close();
+  }
+  if (!best) throw new Error("Could not compress this photo");
 
-  return {
-    file: output,
-    originalBytes: file.size,
-    compressedBytes: output.size,
-  };
+  const ext = best.type === "image/webp" ? "webp" : "jpg";
+  const baseName = file.name.replace(/\.[^.]+$/, "") || "photo";
+  const output = new File([best], `${baseName}.${ext}`, { type: best.type, lastModified: Date.now() });
+
+  return { file: output, originalBytes: file.size, compressedBytes: output.size };
 }
 
 export function formatFileSize(bytes: number) {

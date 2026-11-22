@@ -12,10 +12,10 @@ export function ImageField({ value, onChange }: { value: string; onChange: (url:
     setBusy(true);
     try {
       const result = await compressImage(file);
-      const path = `site/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.webp`;
+      const path = `site/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${result.file.type === "image/webp" ? "webp" : "jpg"}`;
       const { error } = await supabase.storage.from("product-images").upload(path, result.file, {
         cacheControl: "31536000",
-        contentType: "image/webp",
+        contentType: result.file.type,
         upsert: false,
       });
       if (error) throw error;
