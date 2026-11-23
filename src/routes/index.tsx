@@ -9,6 +9,7 @@ import { useText } from "@/lib/content";
 import { useLandingPages } from "@/lib/landing";
 import { cdnImage } from "@/components/site/SmartImage";
 import comboHero from "@/assets/combo-hero.jpg";
+import fasciaHero from "@/assets/fascia-gun-box.webp";
 
 export const Route = createFileRoute("/")({
   loader: async ({ context }) => {
@@ -42,7 +43,10 @@ function Index() {
   const { data: products } = useQuery({ ...productsQuery, ...(initial ? { initialData: initial } : {}) });
   const featured = (products ?? []).filter((p) => p.featured);
   const { pages } = useLandingPages();
-  const offers = pages.filter((p) => p.active && p.showOnHome);
+  const offers = pages.filter((p) => p.active);
+  const fasciaImage = t("fascia.img.hero") ? cdnImage(t("fascia.img.hero")) : fasciaHero;
+  const fasciaRawPrice = t("fascia.price").replace(/[০-৯]/g, (digit) => String("০১২৩৪৫৬৭৮৯".indexOf(digit)));
+  const fasciaPrice = Number(fasciaRawPrice.replace(/\D/g, "")) || 1090;
 
 
   return (
@@ -117,6 +121,15 @@ function Index() {
               <div className="p-4">
                 <p className="font-display text-xl">Grinder + Multi Cooker Combo</p>
                 <p className="mt-1 font-semibold text-primary">Free delivery · Cash on delivery</p>
+                <p className="eyebrow mt-2">View offer →</p>
+              </div>
+            </Link>
+            <Link to="/fascia-gun"
+              className="overflow-hidden rounded-xl border border-border bg-card transition-shadow hover:shadow-[var(--shadow-soft)]">
+              <img src={fasciaImage} alt={`${t("fascia.title1")} ${t("fascia.title2")}`} loading="lazy" className="aspect-[4/3] w-full object-cover" />
+              <div className="p-4">
+                <p className="font-display text-xl">{t("fascia.title1")} {t("fascia.title2")}</p>
+                <p className="mt-1 font-semibold text-primary">৳{fasciaPrice.toLocaleString("bn-BD")} · {t("fascia.deliveryLine")}</p>
                 <p className="eyebrow mt-2">View offer →</p>
               </div>
             </Link>

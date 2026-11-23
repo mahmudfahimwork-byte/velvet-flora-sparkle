@@ -9,6 +9,7 @@ import { WHATSAPP_NUMBER, WhatsAppIcon } from "@/components/site/QuickOrder";
 import { contentQuery } from "@/lib/content";
 import { LANDING_KEY, parseLandingPages, useLandingPages } from "@/lib/landing";
 import { cdnImage } from "@/components/site/SmartImage";
+import { checkOrderGuard, getOrderErrorMessage, markOrderPlaced } from "@/lib/order-guard";
 
 export const Route = createFileRoute("/offer/$slug")({
   loader: async ({ context, params }) => {
@@ -137,6 +138,12 @@ function OfferPage() {
     }
     setErrors({});
     if (trap) return setDone("VF-RECEIVED");
+    const guardMessage = await checkOrderGuard(parsed.data.phone);
+    if (guardMessage) {
+      setErrors({ phone: guardMessage });
+      toast.error(guardMessage);
+      return;
+    }
     if (lock.current) return;
     lock.current = true;
     setSubmitting(true);
@@ -163,9 +170,10 @@ function OfferPage() {
     setSubmitting(false);
     if (error) {
       lock.current = false;
-      toast.error("অর্ডার পাঠানো যায়নি — হোয়াটসঅ্যাপে এক ক্লিকে অর্ডার করুন।");
+      toast.error(getOrderErrorMessage(error, "অর্ডার পাঠানো যায়নি — হোয়াটসঅ্যাপে এক ক্লিকে অর্ডার করুন।"));
       return;
     }
+    await markOrderPlaced(parsed.data.phone);
     track(
       "Purchase",
       { value: grand, currency: "BDT", content_type: "product", content_ids: [pkgSlug(selected.id)], num_items: 1, order_id: code },

@@ -89,7 +89,7 @@ export function LandingPanel() {
               /offer/{p.slug}
             </a>
             <p className="text-xs text-muted-foreground">
-              {p.active ? "Live" : "Hidden"} · {p.showOnHome ? "Shown on home page" : "Not on home page"} · {p.packages.length} option(s)
+              {p.active ? "Live · Shown on home page" : "Hidden"} · {p.packages.length} option(s)
             </p>
           </div>
           <div className="flex gap-2">
@@ -176,9 +176,7 @@ function Editor({
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={p.active} onChange={(e) => set("active", e.target.checked)} /> Page is live
             </label>
-            <label className="flex items-center gap-2 text-sm">
-              <input type="checkbox" checked={p.showOnHome} onChange={(e) => set("showOnHome", e.target.checked)} /> Show on main website home page
-            </label>
+            <p className="text-sm text-muted-foreground">Active offer pages automatically appear on the main website home page.</p>
           </div>
         </div>
       </div>

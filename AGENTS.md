@@ -11,3 +11,4 @@
 
 - Compress admin-uploaded raster photos in the browser to bounded WebP files before storage to limit bandwidth usage.
 - Stored product photos render through cdnImage() → /storage-cdn/* (vercel.json rewrite) so Vercel's CDN caches them and storage egress stays low.
+- Enforce guest checkout abuse controls in a database trigger, paired with a non-identifying browser token, so phone/device cooldowns cover every checkout path consistently.

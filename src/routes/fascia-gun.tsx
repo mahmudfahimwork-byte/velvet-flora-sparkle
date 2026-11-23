@@ -10,6 +10,7 @@ import boxImgSrc from "@/assets/fascia-gun-box.webp";
 import headsImgSrc from "@/assets/fascia-gun-heads.webp";
 import { useText, useContentReady } from "@/lib/content";
 import { cdnImage } from "@/components/site/SmartImage";
+import { checkOrderGuard, getOrderErrorMessage, markOrderPlaced } from "@/lib/order-guard";
 
 export const Route = createFileRoute("/fascia-gun")({
   head: () => ({
@@ -163,6 +164,12 @@ function FasciaGun() {
     }
     setErrors({});
     if (trap) return setDone("VF-RECEIVED");
+    const guardMessage = await checkOrderGuard(parsed.data.phone);
+    if (guardMessage) {
+      setErrors({ phone: guardMessage });
+      toast.error(guardMessage);
+      return;
+    }
     if (lock.current) return;
     lock.current = true;
     setSubmitting(true);
@@ -191,9 +198,10 @@ function FasciaGun() {
     if (error) {
       lock.current = false;
       setFailed(true);
-      toast.error("অর্ডার পাঠানো যায়নি — হোয়াটসঅ্যাপে এক ক্লিকে অর্ডার করুন।");
+      toast.error(getOrderErrorMessage(error, "অর্ডার পাঠানো যায়নি — হোয়াটসঅ্যাপে এক ক্লিকে অর্ডার করুন।"));
       return;
     }
+    await markOrderPlaced(parsed.data.phone);
     track(
       "Purchase",
       { value: TOTAL, currency: "BDT", content_type: "product", content_ids: [SLUG], num_items: 1, order_id: code },

@@ -16,6 +16,7 @@ import { CartUpsell } from "@/components/site/CartUpsell";
 import { UnlockPicks } from "@/components/site/UnlockPicks";
 import { WhatsAppIcon, whatsappCartUrl } from "@/components/site/QuickOrder";
 import { pixelTrack } from "@/lib/pixel";
+import { checkOrderGuard, getOrderErrorMessage, markOrderPlaced } from "@/lib/order-guard";
 
 
 
@@ -127,6 +128,12 @@ function CartPage() {
       navigate({ to: "/order-confirmed", search: { code: "VF-RECEIVED" } });
       return;
     }
+    const guardMessage = await checkOrderGuard(parsed.data.phone);
+    if (guardMessage) {
+      setErrors({ phone: guardMessage });
+      toast.error(guardMessage);
+      return;
+    }
     if (submitting || submitLock.current) return;
     submitLock.current = true;
     setSubmitting(true);
@@ -159,9 +166,11 @@ function CartPage() {
     if (error) {
       submitLock.current = false;
       setFailed(true);
-      toast.error("Order didn't go through — finish it on WhatsApp in one tap.");
+      toast.error(getOrderErrorMessage(error, "Order didn't go through — finish it on WhatsApp in one tap."));
       return;
     }
+
+    await markOrderPlaced(parsed.data.phone);
 
     track(
       "Purchase",
