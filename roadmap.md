@@ -4,3 +4,4 @@
 - [x] Add browser-side one-hour phone/device cooldowns and fake-number filtering across all public checkout forms.
 - [ ] Add database-wide phone/device enforcement when Lovable Cloud can be resumed; currently blocked because the user cannot afford to turn it on.
 - [x] Test cooldown and fake-number rules; visually verify the homepage card without placing a customer order.
+- [x] Fix fascia-gun image swapping: show the uploaded image immediately when set, otherwise use the bundled image; size both images for mobile.

@@ -8,11 +8,12 @@ import { track } from "@/lib/track";
 import { WHATSAPP_NUMBER, WhatsAppIcon } from "@/components/site/QuickOrder";
 import boxImgSrc from "@/assets/fascia-gun-box.webp";
 import headsImgSrc from "@/assets/fascia-gun-heads.webp";
-import { useText, useContentReady } from "@/lib/content";
+import { useText, useContentReady, contentQuery } from "@/lib/content";
 import { cdnImage } from "@/components/site/SmartImage";
 import { checkOrderGuard, getOrderErrorMessage, markOrderPlaced } from "@/lib/order-guard";
 
 export const Route = createFileRoute("/fascia-gun")({
+  loader: ({ context }) => context.queryClient.fetchQuery({ ...contentQuery, staleTime: 0 }).catch(() => undefined),
   head: () => ({
     meta: [
       { title: "ফ্যাশিয়া ম্যাসাজ গান — ৩-বল হেড সহ মাত্র ৳১,০৯০ | ফ্রি ডেলিভারি" },
@@ -258,8 +259,8 @@ function FasciaGun() {
             {t("fascia.cta")}
           </button>
         </div>
-        <div className="relative mt-6 md:mt-0">
-          <img src={img("fascia.img.hero", boxImgSrc)} alt="ফ্যাশিয়া ম্যাসাজ গান বক্স" className="w-full rounded-3xl shadow-lift" />
+        <div className="relative mt-6 flex h-[min(85vw,340px)] items-center justify-center md:mt-0 md:h-[min(52vw,640px)]">
+          <img src={img("fascia.img.hero", boxImgSrc)} alt="ফ্যাশিয়া ম্যাসাজ গান বক্স" fetchPriority="high" decoding="async" className="h-full max-w-full rounded-3xl object-contain shadow-lift" />
           <div className="absolute -right-2 -top-3 rotate-6 rounded-2xl bg-accent px-3 py-2 text-center text-sm font-extrabold text-accent-foreground shadow-soft">
             ৳{bn(WAS - PRICE)}<br />ছাড়
           </div>
@@ -302,7 +303,9 @@ function FasciaGun() {
       {/* Features */}
       <Reveal className="mx-auto mt-14 max-w-5xl px-4">
         <div className="grid items-center gap-8 md:grid-cols-2">
-          <img src={img("fascia.img.heads", headsImgSrc)} alt="ফ্যাশিয়া গান ও সব ম্যাসাজ হেড" loading="lazy" className="w-full rounded-3xl shadow-soft" />
+          <div className="flex h-[min(85vw,340px)] items-center justify-center md:h-[min(52vw,640px)]">
+            <img src={img("fascia.img.heads", headsImgSrc)} alt="ফ্যাশিয়া গান ও সব ম্যাসাজ হেড" loading="lazy" decoding="async" className="h-full max-w-full rounded-3xl object-contain shadow-soft" />
+          </div>
           <div>
             <h2 className="text-2xl font-extrabold md:text-3xl">বক্সে যা যা পাবেন</h2>
             <ul className="mt-4 space-y-2.5">
